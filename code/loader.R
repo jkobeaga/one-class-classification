@@ -9,6 +9,7 @@ load_libraries <- function(){
   library(e1071)
   library(caret)
   library(kernlab)
+  library(h2o)
   
   library(dummies)
 }
@@ -131,6 +132,9 @@ load_skin <- function(){
 #   df <- df[,-1]
 #   df
 # }
+
+# Loading libraries
+load_libraries()
 
 # Loading all the datasets
 blood_trans <- load_blood()

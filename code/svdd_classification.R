@@ -4,6 +4,13 @@ svdd_classification <- function(df,prop=0.05, file_name){
   training <- df[index,]
   testing <- df[-index,]
   training <- data_split(training, prop = prop)
+  # removing variables with null variance
+  null_var <- nearZeroVar(x = training[,-ncol(training)])
+  if(length(null_var)>0)training <- training[,-null_var]
+  
+  target <- colnames(training)[ncol(training)]
+  formulae <- formula(paste(target, "~."))
+  
   
   ## TRAINING
   nu_list <- seq(0.01,0.2,0.02)
@@ -12,12 +19,13 @@ svdd_classification <- function(df,prop=0.05, file_name){
   for(gam in gamma_list){
     for(nu in nu_list){
       # cat(dim(training)[2], summary(training[,10]))
-      model <- svm(as.factor(training[,ncol(training)])~., data = training, type = "one-classification",
+      model <- svm(formulae, data = training, type = "one-classification",
                    kernel = "radial", nu = nu, gamma= gam, cross=10)
       # cat(predict(model,testing))
-      cm <- confusionMatrix(ifelse(predict(model,testing)==T,1,0), testing[,ncol(testing)])
+      cm <- confusionMatrix(ifelse(predict(model,testing)==T,1,0), testing[,ncol(testing)],
+                            positive = "1")
       cat(file_name, nu, round(cm$table[1,1],2),round(cm$table[1,2],2),round(cm$table[2,1],2),
-          round(cm$table[2,2],2), round(cm$byClass[4],2), round(cm$byClass[6],2),
+          round(cm$table[2,2],2), round(cm$byClass[6],2), round(cm$byClass[4],2),
           round(cm$overall[2],2),"\n",  file = "results/results_svdd.txt", append = T, sep = ",")
     }
   }
@@ -26,7 +34,7 @@ svdd_classification <- function(df,prop=0.05, file_name){
 
 datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
               "mammo", "parkinson", "biodegrad", "seeds")# skin
-cat("file,nu,TN,FP,FN,FP,Recall,Neg_pred,Kappa,\n", file = "results/results_svdd.txt", append = F)
+cat("file,nu,TN,FP,FN,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_svdd.txt", append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
   svdd_classification(datasets[[i]], file_name = datasets_names[i])
