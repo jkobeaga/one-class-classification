@@ -1,0 +1,6 @@
+- Scholkopf,mu-classification
+- SVDD
+- DBN + SVDD/Scholkopf
+- Cascada
+- Logistic Regression + correction
+- FRaC

@@ -1,0 +1,5 @@
+########################################
+		NOTAS
+########################################
+
+Al tener tan pocos datos hay mucha variabilidad en las metricas.
