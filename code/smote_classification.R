@@ -1,9 +1,13 @@
 smote_classification <- function(df,prop=0.05, file_name){
   # Dividimos en train y test (70-30)
-  index <- createDataPartition(df[,dim(df)[2]], list = FALSE, p = 0.7)
-  training <- df[index,]
-  testing <- df[-index,]
-  training <- data_split(training, prop = prop)
+  # index <- createDataPartition(df[,dim(df)[2]], list = FALSE, p = 0.7)
+  # training <- df[index,]
+  # testing <- df[-index,]
+  # training <- data_split(training, prop = prop)
+  training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
+  testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+  training[, ncol(training)] <- as.factor(training[, ncol(training)])
+  testing[, ncol(testing)] <- as.factor(testing[, ncol(testing)])
   
   # removing variables with null variance
   null_var <- nearZeroVar(x = training[,-ncol(training)])
@@ -12,7 +16,7 @@ smote_classification <- function(df,prop=0.05, file_name){
   target <- colnames(training)[ncol(training)]
   formulae <- formula(paste(target, "~."))
   cat("Before Smote:", dim(training),length(which(training[,ncol(training)]==1)),"\n")
-  training <- SMOTE(formulae, data = training, perc.over = 3000,perc.under = 100)
+  training <- SMOTE(formulae, data = training, perc.over = 3000, perc.under = 100)
   training[,ncol(training)] <- as.factor(ifelse(training[,ncol(training)]==0,"No","Yes"))
   testing[,ncol(testing)] <- as.factor(ifelse(testing[,ncol(testing)]==0,"No","Yes"))
 

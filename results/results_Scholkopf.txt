@@ -1,1 +1,2 @@
 file,nu,TN,FP,FN,TP,Recall,Neg_pred,Kappa,
+blood_trans,0.01,171,53,0,0,0,0.76,0blood_trans,0.03,171,53,0,0,0,0.76,0blood_trans,0.05,171,53,0,0,0,0.76,0blood_trans,0.07,171,53,0,0,0,0.76,0blood_trans,0.09,171,53,0,0,0,0.76,0

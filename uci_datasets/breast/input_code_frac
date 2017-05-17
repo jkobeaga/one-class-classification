@@ -1,0 +1,2 @@
+frac/detect -X ../../one-class-classification/uci_datasets/breast/training.txt -Q ../../one-class-classification/uci_datasets/breast/testing.txt -d "," -T -w ~/Development/Weka/weka-3-8-1/weka.jar -o ../../one-class-classification/uci_datasets/breast/
+

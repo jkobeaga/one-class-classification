@@ -22,7 +22,7 @@ to_dummies <- function(df){
 
 # Functions to load datasets and prepare to use them
 load_blood <- function(){
-  df <- read.csv("./uci_datasets/blood_transfusion/transfusion.txt", sep = ",", header = FALSE)
+  df <- read.csv("./uci_datasets/blood_trans/transfusion.txt", sep = ",", header = FALSE)
   df[,5] <- as.factor(df[,5])
   df <- to_dummies(df)
   df
@@ -69,7 +69,7 @@ load_haberman <- function(){
 }
 
 load_liver <- function(){
-  df <- read.csv("./uci_datasets/indian_liver/Indian Liver Patient Dataset (ILPD).csv", sep = ",", header = F)
+  df <- read.csv("./uci_datasets/liver/Indian Liver Patient Dataset (ILPD).csv", sep = ",", header = F)
   df <- df[-which(is.na(df$V10)),]
   df$V11 <- as.factor(ifelse(df$V11 == 1,0,1))
   df <- to_dummies(df)
@@ -84,7 +84,7 @@ load_ionosphere <- function(){
 }
 
 load_mammo <- function(){
-  df <- read.csv("./uci_datasets/mammographic_masses/mammographic_masses.csv", sep = ",", header = F)
+  df <- read.csv("./uci_datasets/mammo/mammographic_masses.csv", sep = ",", header = F)
   df <- df[,-1]
   df$V2 <- as.numeric(df$V2)
   df <- df[-which(df$V3=="?"),]
@@ -107,7 +107,7 @@ load_parkinson <- function(){
 }
 
 load_biodegrad <- function(){
-  df  <- read.csv("./uci_datasets/biodegradation/biodeg.csv", sep = ";", header = F)
+  df  <- read.csv("./uci_datasets/biodegrad/biodeg.csv", sep = ";", header = F)
   df$V42 <- as.factor(ifelse(df$V42 == "NRB", 0, 1))
   df <- to_dummies(df)
   df
@@ -164,9 +164,71 @@ data_split <- function(df, prop = 0.05){
   df_t
 }
 
+# Prepare df for SVDD
 svdd_df <- function(df){
     df <- lapply(df, function(x) type.convert(as.character(x)))
   df
 }
+
+# Create and write training and testing datasets
+create_train_test <- function(df, folder, prop =  0.05){
+  index <- createDataPartition(df[,dim(df)[2]], list = FALSE, p = 0.7)
+  training <- df[index,]
+  testing <- df[-index,]
+  training <- data_split(training, prop = prop)
+  location <- paste("./uci_datasets/", folder, sep = "")
+  # Write files for almost all models
+  write.table(training, file = paste(location, "/training.txt", sep = ""), sep = ",", row.names = FALSE)
+  write.table(testing, file = paste(location, "/testing.txt", sep = ""), sep = ",", row.names = FALSE)
+  # Write files for FRaC
+  write.table(training[, -ncol(training)], file = paste(location, "/FRaC/training_frac", sep = ""),
+            sep = "\t", col.names = FALSE, row.names = FALSE)
+  write.table(testing[, -ncol(testing)], file = paste(location, "/FRaC/testing_frac", sep = ""),
+            sep = "\t", col.names = FALSE, row.names = FALSE)
+  write.table(training[, ncol(training)], file = paste(location, "/FRaC/training_labels", sep = ""),
+            sep = "\t", col.names = FALSE, row.names = FALSE)
+  write.table(testing[, ncol(testing)], file = paste(location, "/FRaC/testing_labels", sep = ""),
+            sep = "\t", col.names = FALSE, row.names = FALSE)
+
+}
+
+datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver",
+                    "ionosphere", "mammo", "parkinson", "biodegrad", "seeds")# skin
+
+for(i in 1:length(datasets)){
+  cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
+  create_train_test(datasets[[i]], folder = datasets_names[i])
+  
+}
+
+
+frac_metadata <- function(datas, names){
+  for(j in 1:length(datas)){
+    df <- datas[[j]]
+    values <- unique(df[,1])
+    if(length(values)<8){
+      input <- paste(1, "\tnominal\t",paste(sort(values),collapse = ","), sep = "")
+    }
+    else{
+      input <- paste(1, "\tcontinuous\t", round(min(df[,1]),2), ",", round(max(df[,1]),2),
+                     sep = "")
+    }
+    write.table(input, file = paste("./uci_datasets/",names[j],"/metadata", sep = ""), quote =  F,
+                                  row.names = F, col.names = F)
+    for(i in 2:(ncol(df)-1)){
+      values <- unique(df[,i])
+      if(length(values)<8){
+        input <- paste(i, "\tnominal\t", paste(sort(values),collapse = ","), sep = "")
+      }
+      else{
+        input <- paste(i, "\tcontinuous\t", round(min(df[,i]),2), ",", round(max(df[,i]),2),
+                       sep = "")
+      }
+      write.table(input, file = paste("./uci_datasets/",names[j],"/FRaC/metadata", sep = ""), quote =  F,
+                row.names = F, col.names = F, append = T)
+    }
+  }
+}
+
 
 

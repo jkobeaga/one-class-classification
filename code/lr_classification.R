@@ -1,9 +1,12 @@
 LR_classification <- function(df,prop=0.05, file_name){
   # Dividimos en train y test (70-30)
-  index <- createDataPartition(df[,dim(df)[2]], list = FALSE, p = 0.7)
-  training <- df[index,]
-  testing <- df[-index,]
-  training <- data_split(training, prop = prop)
+  # index <- createDataPartition(df[,dim(df)[2]], list = FALSE, p = 0.7)
+  # training <- df[index,]
+  # testing <- df[-index,]
+  # training <- data_split(training, prop = prop)
+  training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
+  testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+  
   n_pos <- which(training[,ncol(training)]=="1")
   training <- training[c(n_pos, sample(which(training[,ncol(training)]=="0"),length(n_pos)*10)),]
   # removing variables with null variance
