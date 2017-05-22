@@ -6,6 +6,9 @@ weight_classification <- function(df,prop=0.05, file_name){
   # training <- data_split(training, prop = prop)
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+  # Scaling the datasets [0,1]
+  training <- scale_df(training)
+  testing <- scale_df(testing)
   
   target <- colnames(training)[ncol(training)]
   

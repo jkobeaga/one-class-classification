@@ -6,12 +6,15 @@ baseline_classification <- function(df,prop=0.05, file_name){
   # training <- data_split(training, prop = prop)
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
-  target <- colnames(training)[ncol(training)]
+  # Scaling the datasets [0,1]
+  training <- scale_df(training)
+  testing <- scale_df(testing)
   
   # removing variables with null variance
   null_var <- nearZeroVar(x = training[,-ncol(training)])
   if(length(null_var)>0)training <- training[,-null_var]
   
+  target <- colnames(training)[ncol(training)]
   formulae <- formula(paste(target, "~."))
   training[,ncol(training)] <- as.factor(ifelse(training[,ncol(training)]==0,"No","Yes"))
   testing[,ncol(testing)] <- as.factor(ifelse(testing[,ncol(testing)]==0,"No","Yes"))

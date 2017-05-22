@@ -8,6 +8,10 @@ smote_classification <- function(df,prop=0.05, file_name){
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
   training[, ncol(training)] <- as.factor(training[, ncol(training)])
   testing[, ncol(testing)] <- as.factor(testing[, ncol(testing)])
+  # Scaling the datasets [0,1]
+  training <- scale_df(training)
+  testing <- scale_df(testing)
+  
   
   # removing variables with null variance
   null_var <- nearZeroVar(x = training[,-ncol(training)])

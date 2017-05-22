@@ -6,9 +6,14 @@ LR_classification <- function(df,prop=0.05, file_name){
   # training <- data_split(training, prop = prop)
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+  # Scaling the datasets [0,1]
+  training <- scale_df(training)
+  testing <- scale_df(testing)
   
+  # Taking 10% of positive observations
   n_pos <- which(training[,ncol(training)]=="1")
   training <- training[c(n_pos, sample(which(training[,ncol(training)]=="0"),length(n_pos)*10)),]
+  
   # removing variables with null variance
   null_var <- nearZeroVar(x = training[,-ncol(training)])
   if(length(null_var)>0)training <- training[,-null_var]

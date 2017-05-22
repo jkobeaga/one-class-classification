@@ -201,11 +201,27 @@ for(i in 1:length(datasets)){
   
 }
 
+# To scale data into [0,1]
+scale_df <- function(df){
+  num_col <- c()
+  for(i in 1:dim(df)[2]){
+    if(length(unique(df[,i])) > 9){
+      num_col <- c(num_col,i)
+      }
+  }
+  if(length(num_col==1)){
+    df[,num_col] <-   predict(preProcess(as.data.frame(df[,num_col]), method = c("range")),as.data.frame(df[,num_col]))
+    }
+  if(length(num_col)>1){
+    df[,num_col] <- predict(preProcess(df[,num_col], method = c("range")),df[,num_col])
+    }
+  df
+}
 
+# Create metadata for FRaC
 frac_metadata <- function(datas, names){
   for(j in 1:length(datas)){
     df <- datas[[j]]
-    write <- FALSE
     values <- unique(df[,1])
     if(length(values)<8 | is.integer(df[,1])){
       if(length(values)>1){
@@ -217,7 +233,7 @@ frac_metadata <- function(datas, names){
     else{
       input <- paste(1, "\tcontinuous\t", round(min(df[,1]),2), ",", round(max(df[,1]),2),
                      sep = "")
-      wrote <- TRUE
+      write <- TRUE
     }
     if(write == TRUE){
       write.table(input, file = paste("./uci_datasets/",names[j],"/FRaC/metadata", sep = ""),
