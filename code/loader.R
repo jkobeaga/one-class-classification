@@ -182,13 +182,13 @@ create_train_test <- function(df, folder, prop =  0.05){
   write.table(testing, file = paste(location, "/testing.txt", sep = ""), sep = ",", row.names = FALSE)
   # Write files for FRaC
   write.table(training[, -ncol(training)], file = paste(location, "/FRaC/training_frac", sep = ""),
-            sep = "\t", col.names = FALSE, row.names = FALSE)
+            sep = ",", col.names = FALSE, row.names = FALSE)
   write.table(testing[, -ncol(testing)], file = paste(location, "/FRaC/testing_frac", sep = ""),
-            sep = "\t", col.names = FALSE, row.names = FALSE)
+            sep = ",", col.names = FALSE, row.names = FALSE)
   write.table(training[, ncol(training)], file = paste(location, "/FRaC/training_labels", sep = ""),
-            sep = "\t", col.names = FALSE, row.names = FALSE)
+            sep = ",", col.names = FALSE, row.names = FALSE)
   write.table(testing[, ncol(testing)], file = paste(location, "/FRaC/testing_labels", sep = ""),
-            sep = "\t", col.names = FALSE, row.names = FALSE)
+            sep = ",", col.names = FALSE, row.names = FALSE)
 
 }
 
@@ -205,27 +205,46 @@ for(i in 1:length(datasets)){
 frac_metadata <- function(datas, names){
   for(j in 1:length(datas)){
     df <- datas[[j]]
+    write <- FALSE
     values <- unique(df[,1])
-    if(length(values)<8){
-      input <- paste(1, "\tnominal\t",paste(sort(values),collapse = ","), sep = "")
+    if(length(values)<8 | is.integer(df[,1])){
+      if(length(values)>1){
+        input <- paste(1, "\tnominal\t",paste(sort(values),collapse = ","), sep = "")
+        write <- TRUE
+        }
+      
     }
     else{
       input <- paste(1, "\tcontinuous\t", round(min(df[,1]),2), ",", round(max(df[,1]),2),
                      sep = "")
+      wrote <- TRUE
     }
-    write.table(input, file = paste("./uci_datasets/",names[j],"/metadata", sep = ""), quote =  F,
-                                  row.names = F, col.names = F)
+    if(write == TRUE){
+      write.table(input, file = paste("./uci_datasets/",names[j],"/FRaC/metadata", sep = ""),
+                  quote =  F, row.names = F, col.names = F)  
+      write <- FALSE
+    }
+    
     for(i in 2:(ncol(df)-1)){
       values <- unique(df[,i])
-      if(length(values)<8){
-        input <- paste(i, "\tnominal\t", paste(sort(values),collapse = ","), sep = "")
+      # cat(names[j]," Variable: ", i," Valores: ", values, "\n")
+      if(length(values)<8 | is.integer(df[,i])){
+        if(length(values)>1){
+          write <- TRUE
+          input <- paste(i, "\tnominal\t", paste(sort(values),collapse = ","), sep = "")
+          }
       }
       else{
+        write <- TRUE
         input <- paste(i, "\tcontinuous\t", round(min(df[,i]),2), ",", round(max(df[,i]),2),
                        sep = "")
       }
-      write.table(input, file = paste("./uci_datasets/",names[j],"/FRaC/metadata", sep = ""), quote =  F,
-                row.names = F, col.names = F, append = T)
+      if(write == TRUE){
+        write.table(input, file = paste("./uci_datasets/",names[j],"/FRaC/metadata", sep = ""),
+                    quote =  F, row.names = F, col.names = F, append = T)
+        write <- FALSE
+      }
+      
     }
   }
 }
