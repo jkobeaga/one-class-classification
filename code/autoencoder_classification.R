@@ -1,16 +1,13 @@
 autoencoder_classification <- function(df,prop=0.05, file_name){
   # Dividimos en train y test (70-30)
-  # index <- createDataPartition(df[,dim(df)[2]], list = FALSE, p = 0.7)
-  # training <- df[index,]
-  # testing <- df[-index,]
-  # training <- data_split(training, prop = prop)
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
-  testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+  # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+  
   # Scaling the datasets [0,1]
   training <- scale_df(training)
-  testing <- scale_df(testing)
+  # testing <- scale_df(testing)
   
-  # removing variables with null variance
+  # Removing variables with null variance
   null_var <- nearZeroVar(x = training[,-ncol(training)])
   if(length(null_var)>0)training <- training[,-null_var]
   
@@ -21,7 +18,7 @@ autoencoder_classification <- function(df,prop=0.05, file_name){
   ## Initializing H2O (After starting H2O, you can use and view every operation done over H2O in the
   ## Web UI at http://localhost:54321)
   training.hex <- as.h2o(training)
-  testing.hex <- as.h2o(testing)
+  # testing.hex <- as.h2o(testing)
   
   
   
@@ -53,9 +50,9 @@ autoencoder_classification <- function(df,prop=0.05, file_name){
         treshold <- errors_train[round(dim(training.hex)[1]*(1-prop))]
         
         # Using the treshold to determine if an observation is normal
-        result_test <- as.data.frame(h2o.anomaly(training_mdl, testing.hex, per_feature = FALSE))
+        result_test <- as.data.frame(h2o.anomaly(training_mdl, training.hex, per_feature = FALSE))
         pred_class <- factor(ifelse(result_test[,1] > treshold,1,0), levels = c("0","1"))
-        cm <- confusionMatrix(pred_class, testing[,ncol(testing)],
+        cm <- confusionMatrix(pred_class, training[,ncol(training)],
                               positive = "1")
         cat(file_name, l1, l2, l3, round(cm$table[1,1],2),round(cm$table[1,2],2),round(cm$table[2,1],2),
             round(cm$table[2,2],2), round(cm$byClass[6],2), round(cm$byClass[4],2),
@@ -68,7 +65,7 @@ autoencoder_classification <- function(df,prop=0.05, file_name){
 
 datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
                     "mammo", "parkinson", "biodegrad", "seeds")# skin
-cat("file, l1, l2, l3,TN,FP,FN,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_autoencoder.txt", append = F)
+cat("file, l1, l2, l3,TN,FN,FP,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_autoencoder.txt", append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
   autoencoder_classification(datasets[[i]], file_name = datasets_names[i])

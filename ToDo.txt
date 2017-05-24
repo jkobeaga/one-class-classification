@@ -1,0 +1,8 @@
+- Crear una función para que escriba los resultados. una función genera, donde se le indica el clasificadora utilizar y se escribe los resultados obtenidos.
+- Terminar svdd_cluster. Para ello utilizar svdd_classification para hacer la clasifficación de cada cluster.
+- Sacar resultados optimizando diferentes métricas.
+- Hacer gráficas con todos los resultados.
+- Hacer una función que te escriba los mejores parámetros de cada técnica según el entrenamoiento.
+- Fijar los mejores parámetros del train y sacar resultados de los testings. Para ello, hacer una función que te coja los mejores parámetros, que haga el test con cada técnica y escriba los resultados.
+- SACAR LAS CONCLUSIONES Y MEJOR TÉCNICA.
+- Aplicar esa técnica al dataset real.
