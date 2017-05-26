@@ -37,24 +37,27 @@ smote_classification <- function(df,prop=0.05, file_name){
                             training[which(complete.cases(training)),ncol(training)], positive = "Yes")
       if(first == T){
         best_pred <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
-                       round(cm$table[2,2],2), cost, sigma, round(cm$byClass[4],2))
+                       round(cm$table[2,2],2), cost, sigma, round(cm$byClass[4],2), model$nSV[1],
+                       model$nSV[2])
         first <- F
       }
       else{
         pred2 <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
-                   round(cm$table[2,2],2), cost, sigma, round(cm$byClass[4],2))
+                   round(cm$table[2,2],2), cost, sigma, round(cm$byClass[4],2), model$nSV[1],
+                   model$nSV[2])
         best_pred <- best_prediction(best_pred, pred2)
       }
     }
   }
-  cat(file_name, best_pred[5], best_pred[6], best_pred[1], best_pred[2], best_pred[3], best_pred[4],
+  cat(file_name, best_pred[5], best_pred[6], best_pred[8], best_pred[9], best_pred[1], best_pred[2],
+      best_pred[3], best_pred[4],
       best_pred[7], "\n",file = "results/results_SMOTE.txt", append = T, sep = ",")
   cm
 }
 
 datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
                     "mammo", "parkinson", "biodegrad", "seeds")# skin
-cat("file,cost,sigma,TN,FN,FP,TP,Kappa,\n", file = "results/results_SMOTE.txt", append = F)
+cat("file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_SMOTE.txt", append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
   smote_classification(datasets[[i]], file_name = datasets_names[i])

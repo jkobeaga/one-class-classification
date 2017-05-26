@@ -13,6 +13,7 @@ load_libraries <- function(){
   h2o.init()
   library(useful)
   library(NbClust)
+  library(foreach)
   
   library(dummies)
 }
