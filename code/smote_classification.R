@@ -1,4 +1,4 @@
-smote_classification <- function(df,prop=0.05, file_name){
+smote_classification <- function(df,prop=0.05, file_name, C, sigma){
   # Dividimos en train y test (70-30)
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
@@ -49,10 +49,11 @@ smote_classification <- function(df,prop=0.05, file_name){
       }
     }
   }
-  cat(file_name, best_pred[5], best_pred[6], best_pred[8], best_pred[9], best_pred[1], best_pred[2],
-      best_pred[3], best_pred[4],
-      best_pred[7], "\n",file = "results/results_SMOTE.txt", append = T, sep = ",")
-  cm
+  # cat(file_name, best_pred[5], best_pred[6], best_pred[8], best_pred[9], best_pred[1], best_pred[2],
+  #     best_pred[3], best_pred[4],
+  #     best_pred[7], "\n",file = "results/results_SMOTE.txt", append = T, sep = ",")
+  # cm
+  best_pred
 }
 
 datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",

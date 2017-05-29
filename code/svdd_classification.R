@@ -1,6 +1,12 @@
-svdd_classification <- function(df,prop=0.05, file_name){
-  training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
-  testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+svdd_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list, cluster = F){
+  if(cluster == F){
+    training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
+    # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+    
+  }
+  else{
+    training <- df
+  }
   # Scaling the datasets [0,1]
   training <- scale_df(training)
   # testing <- scale_df(testing)
@@ -34,7 +40,7 @@ svdd_classification <- function(df,prop=0.05, file_name){
       for(nu in nu_list){
         # cat(dim(training)[2], summary(training[,10]))
         model <- svm(formulae, data = training, type = "one-classification",
-                     kernel = "radial", nu = nu, gamma= gam, cost = cost, cross=10)
+                     kernel = "radial", gamma= gam, cost = cost, cross=10, na.action = na.omit)
         # cat(predict(model,testing))
         cm <- confusionMatrix(ifelse(predict(model,training) == T,1,0), training[,ncol(training)],
                               positive = "1")
@@ -51,10 +57,10 @@ svdd_classification <- function(df,prop=0.05, file_name){
       }
     }
   }
-  cat(file_name, best_pred[5], best_pred[6], best_pred[7], best_pred[1], best_pred[2], best_pred[3],
-      best_pred[4],best_pred[8], "\n",file = "results/results_svdd.txt", append = T, sep = ",")
+  # cat(file_name, best_pred[5], best_pred[6], best_pred[7], best_pred[1], best_pred[2], best_pred[3],
+  #     best_pred[4],best_pred[8], "\n",file = "results/results_svdd.txt", append = T, sep = ",")
   best_pred
-  cm
+  # cm
 }
 
 datasets_names <- c("blood_trans", "biodegrad", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",

@@ -1,4 +1,4 @@
-weight_classification <- function(df,prop=0.05, file_name){
+weight_classification <- function(df,prop=0.05, file_name, C, sigma, weight_normal, weight_anomaly){
   # Dividimos en train y test (70-30)
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
@@ -51,17 +51,17 @@ weight_classification <- function(df,prop=0.05, file_name){
       }
     }
   }
-  cat(file_name, best_pred[8], best_pred[9], best_pred[6], best_pred[5], best_pred[10], best_pred[11],
-      best_pred[1], best_pred[2], best_pred[3], best_pred[4], best_pred[7],
-      "\n",file = "results/results_weights.txt", append = T, sep = ",")
-  
-  
-  cm
+  # cat(file_name, best_pred[8], best_pred[9], best_pred[6], best_pred[5], best_pred[10], best_pred[11],
+  #     best_pred[1], best_pred[2], best_pred[3], best_pred[4], best_pred[7],
+  #     "\n",file = "results/results_weights.txt", append = T, sep = ",")
+  # cm
+  best_pred
 }
 
 datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
                     "mammo", "parkinson", "biodegrad", "seeds")# skin
-cat("file,P0,P1,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_weights.txt", append = F)
+cat("file,P0,P1,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_weights.txt",
+    append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
   weight_classification(datasets[[i]], file_name = datasets_names[i])

@@ -6,14 +6,15 @@ load_libraries <- function(){
   library(doMC)
   registerDoMC(4)
   library(dplyr)
-  library(e1071)
+  library(e1071)# for svm
   library(caret)
-  library(kernlab)
-  library(h2o)
+  library(kernlab)# for svm kernels
+  library(h2o) # for autoencoder
   h2o.init()
-  library(useful)
-  library(NbClust)
+  library(useful) # for kmeans
+  library(NbClust) # for kmeans
   library(foreach)
+  library(class) # for knn
   
   library(dummies)
 }

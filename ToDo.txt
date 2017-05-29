@@ -6,3 +6,4 @@
 - Fijar los mejores parámetros del train y sacar resultados de los testings. Para ello, hacer una función que te coja los mejores parámetros, que haga el test con cada técnica y escriba los resultados.
 - SACAR LAS CONCLUSIONES Y MEJOR TÉCNICA.
 - Aplicar esa técnica al dataset real.
+- Hacer RF y en cada nodo terminal aplicar aguna otra técnica. Pero, sólo en los caso donde las porbabilidades de ser de cada clase no sean altas.

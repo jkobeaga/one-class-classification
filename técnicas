@@ -1,8 +1,0 @@
-- Scholkopf,mu-classification X
-- SVDD X
-- SMOTE X
-- Pesos X
-- DBN + SVDD/Scholkopf
-- Cascada (No es posible porbarla con los datasets de UCI porque tienen muy pocas observaciones)
-- Logistic Regression + correction X
-- FRaC
