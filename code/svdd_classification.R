@@ -63,8 +63,6 @@ svdd_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamm
   # cm
 }
 
-datasets_names <- c("blood_trans", "biodegrad", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
-              "mammo", "parkinson", "seeds")# skin
 cat("file,C,gam,nu,TN,FN,FP,TP,Kappa,\n", file = "results/results_svdd.txt", append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")

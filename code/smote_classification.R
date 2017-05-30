@@ -56,8 +56,6 @@ smote_classification <- function(df,prop=0.05, file_name, C, sigma){
   best_pred
 }
 
-datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
-                    "mammo", "parkinson", "biodegrad", "seeds")# skin
 cat("file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_SMOTE.txt", append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")

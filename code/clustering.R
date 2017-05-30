@@ -25,6 +25,12 @@ clust_methods <- c("kl", "ch", "hartigan",
                    "frey", "mcclain","dunn", "hubert", "sdindex", "dindex", "sdbw")
 cluster_best(read.csv(file = "uci_datasets/blood_trans/training.txt"), clust_methods, "blood_trans") # 2 clusters
 
+## Biodegrad
+clust_methods <- c("kl", "ch", "hartigan",
+                   "cindex", "db", "silhouette", "duda", "pseudot2", "beale", "ratkowsky", "ball", "ptbiserial",
+                   "frey", "mcclain","dunn", "hubert", "sdindex", "dindex", "sdbw")
+cluster_best(read.csv(file = "uci_datasets/biodegrad/training.txt"), clust_methods, "biodegrad") # 2 clusters
+
 ## Breast
 clust_methods <- c("kl", "ch", "hartigan",
                    "cindex", "db", "silhouette", "duda", "pseudot2", "beale", "ratkowsky", "ball", "ptbiserial",
@@ -59,7 +65,7 @@ cluster_best(read.csv(file = "uci_datasets/liver/training.txt"), clust_methods, 
 clust_methods <- c("kl", "ch", "hartigan",
                    "cindex", "db", "silhouette", "duda", "pseudot2", "beale", "ball",
                     "mcclain","dunn", "hubert", "sdindex", "dindex", "sdbw")
-cluster_best(read.csv(file = "uci_datasets/ionosphere/training.txt"), clust_methods, "liver") # 3 clusters
+cluster_best(read.csv(file = "uci_datasets/ionosphere/training.txt"), clust_methods, "ionosphere") # 3 clusters
 
 ## Mammo
 clust_methods <- c("kl", "ch", "hartigan",
@@ -73,11 +79,6 @@ clust_methods <- c("kl", "ch", "hartigan",
                    "frey", "mcclain","dunn", "hubert", "sdindex", "dindex", "sdbw")
 cluster_best(read.csv(file = "uci_datasets/parkinson/training.txt"), clust_methods, "parkinson") # 3 clusters
 
-## Biodegrad
-clust_methods <- c("kl", "ch", "hartigan",
-                   "cindex", "db", "silhouette", "duda", "pseudot2", "beale", "ratkowsky", "ball", "ptbiserial",
-                   "frey", "mcclain","dunn", "hubert", "sdindex", "dindex", "sdbw")
-cluster_best(read.csv(file = "uci_datasets/biodegrad/training.txt"), clust_methods, "biodgrad") # 2 clusters
 
 ## Seeds
 clust_methods <- c("kl", "ch", "hartigan",

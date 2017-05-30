@@ -156,9 +156,6 @@ seeds <- load_seeds()
 skin <- load_skin()
 # yeast <- load_yeast()
 
-# List of all datasets we need
-datasets <- list(blood_trans, breast, ecoli, fertility, haberman, liver, ionosphere, mammo,
-                 parkinson, biodegrad, seeds)# skin
 
 ## Function to create an unbalanced dataset, (1-prop)- prop.
 data_split <- function(df, prop = 0.05){
@@ -197,6 +194,11 @@ create_train_test <- function(df, folder, prop =  0.05){
 
 }
 
+# List of all datasets we need
+datasets <- list(blood_trans, breast, ecoli, fertility, haberman, liver, ionosphere, mammo,
+                 parkinson, biodegrad, seeds)# skin
+
+# List of datasets names
 datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver",
                     "ionosphere", "mammo", "parkinson", "biodegrad", "seeds")# skin
 

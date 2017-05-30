@@ -42,8 +42,6 @@ LR_classification <- function(df,prop=0.05, file_name){
   pred <- c(pred, cm$table[1,1], cm$table[1,2], cm$table[2,1], cm$table[2,2], round(cm$overall[2],2))
 }
 
-datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
-                    "mammo", "parkinson", "biodegrad", "seeds")# skin
 cat("file,Corrected,TN,FN,FP,TP,Kappa,\n", file = "results/results_LR.txt", append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")

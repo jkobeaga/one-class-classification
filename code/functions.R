@@ -77,6 +77,10 @@ cluster_assign <- function(df,name){
 # Predicting the cluster for each observation from test
 predict_cluster <- function(train, test){
   # The training set has one more column than the testing set. This column refers to the cluster.
+  cat("\nDim train:")
+  print(dim(train[, -c(ncol(train),ncol(train)-1)]))
+  cat("\nDim Test")
+  print(dim(test[,-ncol(test)]))
   test$cluster <- knn(train[, -c(ncol(train),ncol(train)-1)], test[,-ncol(test)],
                       cl = train[,ncol(train)], k = 10)
   test
@@ -116,7 +120,7 @@ best_prediction <- function(pred1, pred2, recall = T, F1 = F, accuracy = F){
 
 # Write results for each technique in a file
 write_result <- function(datasets, names, baseline = F, svdd = F, one_class = F,  smote = F,
-                         weights = F, logistic = F, autoencoder = F, all = F){
+                         weights = F, logistic = F, autoencoder = F, all = F, cluster = F){
   if(baseline == T){
     C=c(seq(0.01,0.2,0.05),seq(0.3,1,0.1))
     sigma=seq(0.1,1,0.3)
@@ -132,26 +136,58 @@ write_result <- function(datasets, names, baseline = F, svdd = F, one_class = F,
     } 
   }
   if(svdd == T){
-    C <- c(seq(0.01,0.2,0.02))
-    gamma_list <- seq(0.1,0.6,0.06)
-    cat("file,C,gam,nu,TN,FN,FP,TP,Kappa,\n", file = "results/results_svdd.txt", append = F)
-    for(i in 1:length(datasets)){
-      svdd_model <- svdd_classification(datasets[[i]], file_name = datasets_names[i], C, gamma_list)
-      cat(datasets_names[i], svdd_model[5], svdd_model[6], svdd_model[7], svdd_model[1], svdd_model[2],
-          svdd_model[3], svdd_model[4], svdd_model[8], "\n",file = "results/results_svdd.txt",
-          append = T, sep = ",")
+    if(cluster == T){
+      cat("file,TN,FP,FN,TP,Kappa,\n", file = "results/results_cluster_svdd.txt",
+          append = F)
+      # nu_list <- seq(0.01,0.2,0.02)
+      gamma_list <- seq(0.1,0.6,0.05)
+      C <- c(seq(0.01,0.2,0.02))
+      for(i in 1:length(datasets)){
+        clust_svdd_model <- cluster_svdd(datasets[[i]], file_name = datasets_names[i], C,
+                                         nu_list = prop, gamma_list)
+        cat(datasets_names[i], clust_svdd_model[1], clust_svdd_model[2], clust_svdd_model[3],
+          clust_svdd_model[4], clust_svdd_model[5], "\n",file = "results/results_cluster_svdd.txt",
+          append = T, sep = ",")}
+
+    }
+    else{
+      C <- c(seq(0.01,0.2,0.02))
+      gamma_list <- seq(0.1,0.6,0.06)
+      cat("file,C,gam,nu,TN,FN,FP,TP,Kappa,\n", file = "results/results_svdd.txt", append = F)
+      for(i in 1:length(datasets)){
+        svdd_model <- svdd_classification(datasets[[i]], file_name = datasets_names[i], C, gamma_list)
+        cat(datasets_names[i], svdd_model[5], svdd_model[6], svdd_model[7], svdd_model[1], svdd_model[2],
+            svdd_model[3], svdd_model[4], svdd_model[8], "\n",file = "results/results_svdd.txt",
+            append = T, sep = ",")
+      }
     }
   }
   if(one_class == T){
-    C <- c(seq(0.01,0.2,0.02))
-    gamma_list <- seq(0.1,0.6,0.06)
-    cat("file,cost,gamma,nu,TN,FN,FP,TP,Kappa,\n", file = "results/results_Scholkopf.txt",
-        append = F)
-    for(i in 1:length(datasets)){
-      oc_model <- svdd_classification(datasets[[i]], file_name = datasets_names[i],C, gamma_list)
-      cat(datasets_names[i], oc_model[5], oc_model[6], oc_model[7],oc_model[1], oc_model[2],
-          oc_model[3], oc_model[4],oc_model[8], "\n",file = "results/results_Scholkopf.txt",
-          append = T, sep = ",")
+    if(cluster == T){
+      cat("file,TN,FP,FN,TP,Kappa,\n", file = "results/results_cluster_Scholkopf.txt",
+          append = F)
+      # nu_list <- seq(0.01,0.2,0.02)
+      gamma_list <- seq(0.1,5,0.3)
+      C <- c(seq(0.01,3,0.2))
+      for(i in 1:length(datasets)){
+        clust_svdd_model <- cluster_nu(datasets[[i]], file_name = datasets_names[i], C = C,
+                                         nu_list = prop, gamma_list = gamma_list)
+        cat(datasets_names[i], clust_svdd_model[1], clust_svdd_model[2], clust_svdd_model[3],
+            clust_svdd_model[4], clust_svdd_model[5], "\n",file = "results/results_cluster_Scholkopf.txt",
+            append = T, sep = ",")}
+      
+    }
+    else{
+      C <- c(seq(0.01,0.2,0.02))
+      gamma_list <- seq(0.1,0.6,0.06)
+      cat("file,cost,gamma,nu,TN,FN,FP,TP,Kappa,\n", file = "results/results_Scholkopf.txt",
+          append = F)
+      for(i in 1:length(datasets)){
+        oc_model <- svdd_classification(datasets[[i]], file_name = datasets_names[i],C, gamma_list)
+        cat(datasets_names[i], oc_model[5], oc_model[6], oc_model[7],oc_model[1], oc_model[2],
+            oc_model[3], oc_model[4],oc_model[8], "\n",file = "results/results_Scholkopf.txt",
+            append = T, sep = ",")
+      }
     }
   }
   if(smote == T){
@@ -185,7 +221,8 @@ write_result <- function(datasets, names, baseline = F, svdd = F, one_class = F,
     
   }
   if(logistic == T){
-    cat("file,Corrected,TN,FN,FP,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_LR.txt", append = F)
+    cat("file,Corrected,TN,FN,FP,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_LR.txt",
+        append = F)
     for(i in 1:length(datasets)){
       lr_model <- LR_classification(datasets[[i]], file_name = datasets_names[i])
       cat(datasets_names[i],"F", lr_model[1], lr_model[2], lr_model[3], lr_model[4], lr_model[5],
@@ -195,7 +232,9 @@ write_result <- function(datasets, names, baseline = F, svdd = F, one_class = F,
       
     }
   }
+
   
 }
 
-write_result(datasets, datasets_names, logistic = T)
+write_result(datasets, datasets_names, one_class = T, cluster = T)
+

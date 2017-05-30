@@ -1,11 +1,12 @@
-nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list){
-  # # Dividimos en train y test (70-30)
-  # index <- createDataPartition(df[,dim(df)[2]], list = FALSE, p = 0.7)
-  # training <- df[index,]
-  # testing <- df[-index,]
-  # training <- data_split(training, prop = prop)
-  training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
-  testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list, cluster = T){
+  if(cluster == F){
+    training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
+    # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+    
+  }
+  else{
+    training <- df
+  }
   # Scaling the datasets [0,1]
   training <- scale_df(training)
   # testing <- scale_df(testing)
@@ -20,7 +21,6 @@ nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_
   # nu_list <- prop
   # gamma_list <- seq(0.1,0.6,0.05)
   first <- T
-  
   for(cost in C){
     for(gam in gamma_list){
       for(nu in nu_list){
@@ -49,8 +49,6 @@ nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_
   best_pred
 }
 
-datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
-                    "mammo", "parkinson", "biodegrad", "seeds")# skin
 cat("file,cost,gamma,nu,nSV_0,nSV_2,TN,FN,FP,TP,Kappa,\n", file = "results/results_Scholkopf.txt",
     append = F)
 for(i in 1:length(datasets)){

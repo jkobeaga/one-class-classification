@@ -63,8 +63,6 @@ autoencoder_classification <- function(df,prop=0.05, file_name){
   cm
 }
 
-datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",
-                    "mammo", "parkinson", "biodegrad", "seeds")# skin
 cat("file, l1, l2, l3,TN,FN,FP,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_autoencoder.txt", append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
