@@ -191,37 +191,67 @@ write_result <- function(datasets, names, baseline = F, svdd = F, one_class = F,
     }
   }
   if(smote == T){
-    sigma_list <- seq(0.1, 1, 0.1)
-    cost_list <- seq(0.5,3,0.5)
-    cat("file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_SMOTE.txt", append = F)
-    for(i in 1:length(datasets)){
-      smote_model <- smote_classification(datasets[[i]], file_name = datasets_names[i], cost_list,
-                                          sigma_list)
-      cat(datasets_names[i], smote_model[5], smote_model[6], smote_model[8], smote_model[9],
-          smote_model[1], smote_model[2], smote_model[3], smote_model[4], smote_model[7],
-          "\n",file = "results/results_SMOTE.txt", append = T, sep = ",")
+    if(cluster == T){
+      gamma_list <- seq(0.1,0.6,0.05)
+      C <- c(seq(0.01,0.2,0.02))
+      cat("file,TN,FN,FP,TP,Kappa,\n",
+          file = "results/results_cluster_SMOTE.txt",append = F)
+      for(i in 1:length(datasets)){
+        cluster_smote_model <- cluster_smote(datasets[[i]], file_name = datasets_names[i], C = C,
+                                             gamma_list = gamma_list)
+        cat(datasets_names[i],cluster_smote_model[1], cluster_smote_model[2], cluster_smote_model[3],
+            cluster_smote_model[4], cluster_smote_model[7],
+            "\n",file = "results/results_cluster_SMOTE.txt", append = T, sep = ",")
+      }
+    }
+    
+    else{
+      sigma_list <- seq(0.1, 1, 0.1)
+      cost_list <- seq(0.5,3,0.5)
+      cat("file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_SMOTE.txt",
+          append = F)
+      for(i in 1:length(datasets)){
+        smote_model <- smote_classification(datasets[[i]], file_name = datasets_names[i], C = cost_list,
+                                            sigma = sigma_list)
+        cat(datasets_names[i], smote_model[5], smote_model[6], smote_model[8], smote_model[9],
+            smote_model[1], smote_model[2], smote_model[3], smote_model[4], smote_model[7],
+            "\n",file = "results/results_SMOTE.txt", append = T, sep = ",")
+      }
     }
   }
   if(weights == T){
     C=seq(0.5,3,0.5)
-    sigma=seq(0.1,1,0.3)
+    gamma_list=seq(0.1,1,0.3)
     weight_normal <- c(0.5,1)
     weight_anomaly <- seq(2,20,2)
-    cat("file,P0,P1,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_weights.txt",
-        append = F)
-    for(i in 1:length(datasets)){
-      weight_model <- weight_classification(datasets[[i]], file_name = datasets_names[i], C, sigma,
-                                            weight_normal, weight_anomaly)
-      cat(datasets_names[i], weight_model[8], weight_model[9], weight_model[6], weight_model[5],
-          weight_model[10], weight_model[11], weight_model[1], weight_model[2], weight_model[3],
-          weight_model[4], weight_model[7], "\n",file = "results/results_weights.txt", append = T,
-          sep = ",")
-      
+    if(cluster == T){
+      cat("file,TN,FN,FP,TP,Kappa,\n",file = "results/results_cluster_weights.txt",append = F)
+      for(i in 1:length(datasets)){
+        cluster_weight_model <- cluster_weight(datasets[[i]], file_name = datasets_names[i], C = C,
+                                               gamma = gamma_list, weight_normal = weight_normal,
+                                               weight_anomaly = weight_anomaly)
+        # cluster_weight_model <- cluster_weight(datasets[[i]], file_name = datasets_names[i], C = C,
+        #                                      gamma_list = gamma_list)
+        cat(datasets_names[i],cluster_weight_model[1], cluster_weight_model[2],
+            cluster_weight_model[3], cluster_weight_model[4], cluster_weight_model[5],
+            "\n",file = "results/results_cluster_weights.txt", append = T, sep = ",")
+      }
     }
-    
+    else{
+      cat("file,P0,P1,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_weights.txt",
+                 append = F)
+      for(i in 1:length(datasets)){
+        weight_model <- weight_classification(datasets[[i]], file_name = datasets_names[i], C, sigma,
+                                              weight_normal, weight_anomaly)
+        cat(datasets_names[i], weight_model[8], weight_model[9], weight_model[6], weight_model[5],
+            weight_model[10], weight_model[11], weight_model[1], weight_model[2], weight_model[3],
+            weight_model[4], weight_model[7], "\n",file = "results/results_weights.txt", append = T,
+            sep = ",")
+      }
+    }
   }
   if(logistic == T){
-    cat("file,Corrected,TN,FN,FP,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_LR.txt",
+    cat("file,Corrected,TN,FN,FP,TP,Kappa,\n", file = "results/results_LR.txt",
         append = F)
     for(i in 1:length(datasets)){
       lr_model <- LR_classification(datasets[[i]], file_name = datasets_names[i])
@@ -236,5 +266,14 @@ write_result <- function(datasets, names, baseline = F, svdd = F, one_class = F,
   
 }
 
+write_result(datasets, datasets_names, baseline = T)
+write_result(datasets, datasets_names, svdd = T)
+write_result(datasets, datasets_names, one_class = T)
+write_result(datasets, datasets_names, smote = T)
+write_result(datasets, datasets_names, weights = T)
+write_result(datasets, datasets_names, logistic = T)
+write_result(datasets, datasets_names, svdd = T, cluster = T)
 write_result(datasets, datasets_names, one_class = T, cluster = T)
+write_result(datasets, datasets_names, smote = T, cluster = T)
+write_result(datasets, datasets_names, weights = T, cluster = T)
 

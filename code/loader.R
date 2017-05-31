@@ -2,13 +2,13 @@
 # Function to load all the necesary libraries 
 load_libraries <- function(){
   set.seed(2017)
-  library(DMwR)
+  library(DMwR) # for SMOTE
   library(doMC)
   registerDoMC(4)
   library(dplyr)
-  library(e1071)# for svm
+  library(e1071) # for svm
   library(caret)
-  library(kernlab)# for svm kernels
+  library(kernlab) # for svm kernels
   library(h2o) # for autoencoder
   h2o.init()
   library(useful) # for kmeans

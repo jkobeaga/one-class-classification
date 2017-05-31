@@ -2,18 +2,18 @@ nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_
   if(cluster == F){
     training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
     # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+    # Scaling the datasets [0,1]
+    training <- scale_df(training)
+    # testing <- scale_df(testing)
     
+    # removing variables with null variance
+    null_var <- nearZeroVar(x = training[,-ncol(training)])
+    if(length(null_var)>0)training <- training[,-null_var]
   }
   else{
     training <- df
   }
-  # Scaling the datasets [0,1]
-  training <- scale_df(training)
-  # testing <- scale_df(testing)
-  
-  # removing variables with null variance
-  null_var <- nearZeroVar(x = training[,-ncol(training)])
-  if(length(null_var)>0)training <- training[,-null_var]
+
   
   
   ## TRAINING
