@@ -1,18 +1,19 @@
-baseline_classification <- function(df,prop=0.05, file_name, C, sigma){
+baseline_classification <- function(df,prop=0.05, file_name, C, sigma, test = F){
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
   # Scaling the datasets [0,1]
   training <- scale_df(training)
-  # testing <- scale_df(testing)
+  testing <- scale_df(testing)
   
   # removing variables with null variance
   null_var <- nearZeroVar(x = training[,-ncol(training)])
   if(length(null_var)>0)training <- training[,-null_var]
+  if(length(null_var)>0)testing <- testing[,-null_var]
   
   target <- colnames(training)[ncol(training)]
   formulae <- formula(paste(target, "~."))
   training[,ncol(training)] <- as.factor(ifelse(training[,ncol(training)]==0,"No","Yes"))
-  # testing[,ncol(testing)] <- as.factor(ifelse(testing[,ncol(testing)]==0,"No","Yes"))
+  testing[,ncol(testing)] <- as.factor(ifelse(testing[,ncol(testing)]==0,"No","Yes"))
   
   ## TRAINING
   # C=c(seq(0.01,0.2,0.05),seq(0.3,1,0.1))
@@ -27,7 +28,13 @@ baseline_classification <- function(df,prop=0.05, file_name, C, sigma){
   params <- c(model$cost, model$gamma, round(cm$table[1,1],2),
               round(cm$table[1,2],2),round(cm$table[2,1],2), round(cm$table[2,2],2),
               round(cm$byClass[4],2))
-  params
+  if(test == T){
+    cm <- confusionMatrix(predict(model,testing), testing[,dim(testing)[2]], positive = "Yes")
+    params_test <- c(round(cm$table[1,1],2), round(cm$table[1,2],2),round(cm$table[2,1],2),
+                     round(cm$table[2,2],2), round(cm$byClass[4],2))
+  }
+  else params_test <- c()
+  list(params, params_test)
 }
 
 datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver", "ionosphere",

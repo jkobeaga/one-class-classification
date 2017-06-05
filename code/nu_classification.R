@@ -1,14 +1,16 @@
-nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list, cluster = T){
+nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list,test= F,
+                              cluster = F){
   if(cluster == F){
     training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
-    # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+    testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
     # Scaling the datasets [0,1]
     training <- scale_df(training)
-    # testing <- scale_df(testing)
+    testing <- scale_df(testing)
     
     # removing variables with null variance
     null_var <- nearZeroVar(x = training[,-ncol(training)])
     if(length(null_var)>0)training <- training[,-null_var]
+    if(length(null_var)>0)testing <- testing[,-null_var]
   }
   else{
     training <- df
@@ -27,7 +29,7 @@ nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_
         # cat(dim(training)[2], summary(training[,10]))
         model <- svm(as.factor(training[,ncol(training)])~., data = training, type = "nu-classification",
                      kernel = "radial", nu = nu, gamma= gam, cost = cost, cross=10)      # cat(predict(model,testing))
-        cm <- confusionMatrix(ifelse(predict(model,training) == T,1,0), training[,ncol(training)],
+        cm <- confusionMatrix(predict(model,training), training[,ncol(training)],
                               positive = "1")
         if(first == T){
           best_pred <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
@@ -42,11 +44,18 @@ nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_
       }
     }
   }
+  if(test == T){
+    cm <- confusionMatrix(ifelse(predict(model,testing) == T,1,0), testing[,ncol(testing)],
+                          positive = "1")
+    params_test <- c(round(cm$table[1,1],2), round(cm$table[1,2],2),round(cm$table[2,1],2),
+                     round(cm$table[2,2],2), round(cm$byClass[4],2))
+  }
+  else params_test <- c()
   # cat(file_name, best_pred[5], best_pred[6], best_pred[7], best_pred[9], best_pred[10],
   #     best_pred[1], best_pred[2], best_pred[3], best_pred[4],best_pred[8],
   #     "\n",file = "results/results_Scholkopf.txt", append = T, sep = ",")
   # cm
-  best_pred
+  list(best_pred, params_test)
 }
 
 cat("file,cost,gamma,nu,nSV_0,nSV_2,TN,FN,FP,TP,Kappa,\n", file = "results/results_Scholkopf.txt",

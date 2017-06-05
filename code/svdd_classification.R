@@ -1,30 +1,35 @@
-svdd_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list, cluster = F){
+svdd_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list,
+                                test = F, cluster = F){
   if(cluster == F){
     training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
-    # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+    testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
     
   }
   else{
     training <- df
+    cat(paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+    testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+    
   }
   # Scaling the datasets [0,1]
   training <- scale_df(training)
-  # testing <- scale_df(testing)
+  testing <- scale_df(testing)
   # training[,ncol(training)] <- as.factor(training[,ncol(training)])
   
   # removing variables with null variance
   null_var <- nearZeroVar(x = training[,-ncol(training)])
   if(length(null_var)>0)training <- training[,-null_var]
+  if(length(null_var)>0)testing <- testing[,-null_var]
   
   target <- colnames(training)[ncol(training)]
   formulae <- formula(paste(target, "~."))
   
   
   ## TRAINING
-  C <- c(seq(0.01,0.2,0.02))
+  # C <- c(seq(0.01,0.2,0.02))
   # nu_list <- seq(0.01,0.05,0.01)
   nu_list <- prop
-  gamma_list <- seq(0.1,0.6,0.06)
+  # gamma_list <- seq(0.1,0.6,0.06)
   first = T
   
   # model <- best.svm(formulae, data = training, type = "one-classification", kernel = "radial",
@@ -57,13 +62,20 @@ svdd_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamm
       }
     }
   }
+  if(test == T){
+    cm <- confusionMatrix(ifelse(predict(model,testing) == T,1,0), testing[,ncol(testing)],
+                          positive = "1")
+    params_test <- c(round(cm$table[1,1],2), round(cm$table[1,2],2),round(cm$table[2,1],2),
+                     round(cm$table[2,2],2), round(cm$byClass[4],2))
+  }
+  else params_test <- c()
   # cat(file_name, best_pred[5], best_pred[6], best_pred[7], best_pred[1], best_pred[2], best_pred[3],
   #     best_pred[4],best_pred[8], "\n",file = "results/results_svdd.txt", append = T, sep = ",")
-  best_pred
+  list(best_pred, params_test)
   # cm
 }
 
-cat("file,C,gam,nu,TN,FN,FP,TP,Kappa,\n", file = "results/results_svdd.txt", append = F)
+# cat("file,C,gam,nu,TN,FN,FP,TP,Kappa,\n", file = "results_training//results_svdd.txt", append = F)
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
   svdd_classification(datasets[[i]], file_name = datasets_names[i])

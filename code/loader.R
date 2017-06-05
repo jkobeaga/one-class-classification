@@ -195,12 +195,14 @@ create_train_test <- function(df, folder, prop =  0.05){
 }
 
 # List of all datasets we need
-datasets <- list(blood_trans, breast, ecoli, fertility, haberman, liver, ionosphere, mammo,
-                 parkinson, biodegrad, seeds)# skin
+datasets <- list(blood_trans, biodegrad, breast, ecoli, fertility, haberman, liver, ionosphere, mammo,
+                 parkinson, seeds)# skin
+# datasets <- list(haberman)# skin
 
 # List of datasets names
-datasets_names <- c("blood_trans", "breast", "ecoli", "fertility", "haberman", "liver",
-                    "ionosphere", "mammo", "parkinson", "biodegrad", "seeds")# skin
+datasets_names <- c("blood_trans", "biodegrad", "breast", "ecoli", "fertility", "haberman", "liver",
+                    "ionosphere", "mammo", "parkinson", "seeds")# skin
+# datasets_names <- c("haberman")# skin
 
 for(i in 1:length(datasets)){
   cat("iiiiiiiiiiiiiiiiiiii", i, "\n")

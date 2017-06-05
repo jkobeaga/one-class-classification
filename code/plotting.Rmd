@@ -1,0 +1,131 @@
+---
+title: "Plotting Results"
+author: "Jon Kobeaga"
+date: "May 31, 2017"
+output: pdf_document
+---
+
+# Plotting Results
+
+En este documento analizaremos los resultados obtenidos anteriormente utilizando diferentes técnicas de anomaly detection.
+
+```{r}
+baseline_r <- read.csv("./results_training/results_baseline.txt", sep = ",")
+svdd_r <- read.csv("./results_training/results_svdd.txt", sep = ",")
+oneclass_r <- read.csv("./results_training/results_Scholkopf.txt", sep = ",")
+smote_50_r <- read.csv("./results_training/results_SMOTE_50.txt", sep = ",")
+smote_60_r <- read.csv("./results_training/results_SMOTE_60.txt", sep = ",")
+smote_65_r <- read.csv("./results_training/results_SMOTE_65.txt", sep = ",")
+weights_r <- read.csv("./results_training/results_weights.txt", sep = ",")
+lr_r <- read.csv("./results_training/results_LR.txt", sep = ",")
+svdd_cr <- read.csv("./results_training/results_cluster_svdd.txt", sep = ",")
+oneclass_cr <- read.csv("./results_training/results_cluster_Scholkopf.txt", sep = ",")
+smote_50_cr <- read.csv("./results_training/results_cluster_SMOTE_50.txt", sep = ",")
+smote_60_cr <- read.csv("./results_training/results_cluster_SMOTE_60.txt", sep = ",")
+smote_65_cr <- read.csv("./results_training/results_cluster_SMOTE_65.txt", sep = ",")
+weights_cr <- read.csv("./results_training/results_cluster_weights.txt", sep = ",")
+```
+
+Ahora calcularemos las metricas que nos interesan basándonos en los resultados obtenidos.
+```{r}
+baseline_r <- add_metric(baseline_r)
+svdd_r <- add_metric(svdd_r)
+oneclass_r <- add_metric(oneclass_r)
+smote_50_r <- add_metric(smote_50_r)
+smote_60_r <- add_metric(smote_60_r)
+smote_65_r <- add_metric(smote_65_r)
+weights_r <- add_metric(weights_r)
+lr_r <- add_metric(lr_r)
+svdd_cr <- add_metric(svdd_cr)
+oneclass_cr <- add_metric(oneclass_cr)
+smote_50_cr <- add_metric(smote_50_cr)
+smote_60_cr <- add_metric(smote_60_cr)
+smote_65_cr <- add_metric(smote_65_cr)
+weights_cr <- add_metric(weights_cr)
+```
+
+
+Ahora para cada modelo, haremos gráficas de cajas para ver como actúa cada modelo..
+
+```{r}
+baseline_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in baseline model")
+svdd_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SVDD model")
+oneclass_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in One-Class model")
+smote_50_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SMOTE 50-50 model")
+smote_60_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SMOTE 60-40 model")
+smote_65_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SMOTE 65 -35 model")
+weights_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Weigths model")
+lr_r %>% filter(Corrected == T) %>%  ggplot(aes(file, recall, fill = file)) + geom_boxplot()  + ggtitle("Recall in Adjusted LR model")
+svdd_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SVDD model")
+oneclass_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster One-Class model")
+smote_50_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SMOTE 50-50 model")
+smote_60_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SMOTE 60-40 model")
+smote_65_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SMOTE 65-35 model")
+weights_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SVDD model")
+```
+
+```{r}
+baseline_r %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in baseline model")
+svdd_r %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in SVDD model")
+oneclass_r %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in One-Class model")
+smote_r %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in SMOTE model")
+weights_r %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in Weigths model")
+lr_r %>% filter(Corrected == T) %>%  ggplot(aes(file, F1, fill = file)) + geom_boxplot()  + ggtitle("F1 in Adjusted LR model")
+svdd_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster SVDD model")
+oneclass_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster One-Class model")
+smote_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster SMOTE model")
+weights_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster Weights model")
+```
+
+Vamos a escoger los mejores parámetros en cada datasets para hacer el training. ESto lo haremos en los siguientes datasets:
+baseline, svdd, oneclass,smote, weights
+
+```{r}
+# baseline
+param_base <- baseline_r %>% count(file, cost) %>%  slice(which.max(n))
+pivot <- baseline_r %>% count(file, sigma) %>%  slice(which.max(n))
+param_base$sigma <- pivot$sigma
+write.table(param_base, file = "./results_training/parameters/baseline.txt", row.names = F, sep = ",")
+# SVDD
+param_svdd <- svdd_r %>% count(file, cost) %>%  slice(which.max(n))
+pivot <- svdd_r %>% count(file, sigma) %>%  slice(which.max(n))
+param_svdd$sigma <- pivot$sigma
+pivot <- svdd_r %>% count(file, nu) %>%  slice(which.max(n))
+param_svdd$nu <- pivot$nu
+write.table(param_svdd, file = "./results_training/parameters/svdd.txt", row.names = F, sep = ",")
+# One-Class
+param_oneclass <- oneclass_r %>% count(file, cost) %>%  slice(which.max(n))
+pivot <- oneclass_r %>% count(file, gamma) %>%  slice(which.max(n))
+param_oneclass$sigma <- pivot$gamma
+pivot <- oneclass_r %>% count(file, nu) %>%  slice(which.max(n))
+param_oneclass$nu <- pivot$nu
+
+write.table(param_oneclass, file = "./results_training/parameters/oneclass.txt", row.names = F, sep = ",")
+# SMOTE 50
+param_smote_50 <- smote_50_r %>% count(file, cost) %>%  slice(which.max(n))
+pivot <- smote_50_r %>% count(file, sigma) %>%  slice(which.max(n))
+param_smote_50$sigma <- pivot$sigma
+write.table(param_smote_50, file = "./results_training/parameters/smote_50.txt", row.names = F, sep = ",")
+# SMOTE 60
+param_smote_60 <- smote_60_r %>% count(file, cost) %>%  slice(which.max(n))
+pivot <- smote_60_r %>% count(file, sigma) %>%  slice(which.max(n))
+param_smote_60$sigma <- pivot$sigma
+write.table(param_smote_60, file = "./results_training/parameters/smote_60.txt", row.names = F, sep = ",")
+# SMOTE 65
+param_smote_65 <- smote_65_r %>% count(file, cost) %>%  slice(which.max(n))
+pivot <- smote_65_r %>% count(file, sigma) %>%  slice(which.max(n))
+param_smote_65$sigma <- pivot$sigma
+write.table(param_smote_65, file = "./results_training/parameters/smote_65.txt", row.names = F, sep = ",")
+# Weigths
+param_weights <- weights_r %>% count(file, cost) %>%  slice(which.max(n))
+pivot <- weights_r %>% count(file, sigma) %>%  slice(which.max(n))
+param_weights$sigma <- pivot$sigma
+pivot <- weights_r %>% count(file, P0) %>%  slice(which.max(n))
+param_weights$P0 <- pivot$P0
+pivot <- weights_r %>% count(file, P1) %>%  slice(which.max(n))
+param_weights$P1 <- pivot$P1
+
+write.table(param_weights, file = "./results_training/parameters/weights.txt", row.names = F, sep = ",")
+
+```
+

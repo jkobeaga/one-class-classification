@@ -1,0 +1,5 @@
+file,cost,sigma,TN,FN,FP,TP,Kappa,
+blood_trans,Called from: cat(datasets_names[i], bl_model[1], bl_model[2], bl_model[3], 
+    bl_model[4], bl_model[5], bl_model[6], bl_model[7], "\n", 
+    file = "results_training//results_baseline.txt", append = T, 
+    sep = ",")

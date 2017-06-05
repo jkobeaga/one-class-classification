@@ -12,7 +12,7 @@ cluster_best <- function(df, methods, name){
   }
   cat("Best number of clusters: ", which.max(clust_polling))
   cat("\nNumber of indices proposed: ", max(clust_polling))
-  cat(name, which.max(clust_polling), "\n", file = "./results/clusters.txt", append = T, sep = ",")
+  cat(name, which.max(clust_polling), "\n", file = "./results_training/clusters.txt", append = T, sep = ",")
   
 }
 

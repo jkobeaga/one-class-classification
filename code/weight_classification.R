@@ -1,18 +1,20 @@
 weight_classification <- function(df,prop=0.05, file_name, C, gamma, weight_normal, weight_anomaly,
-                                  cluster = T){
+                                  test = F, cluster = T){
   # cat("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
   if(cluster == F){
     training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
-    # testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
+    testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
     # Scaling the datasets [0,1]
     training <- scale_df(training)
-    # testing <- scale_df(testing)
+    testing <- scale_df(testing)
     
     # removing variables with null variance
     null_var <- nearZeroVar(x = training[,-ncol(training)])
     if(length(null_var)>0)training <- training[,-null_var]
+    if(length(null_var)>0)testing <- testing[,-null_var]
     
     training[,ncol(training)] <- as.factor(ifelse(training[,ncol(training)]==0,"No","Yes"))
+    testing[,ncol(testing)] <- as.factor(ifelse(testing[,ncol(testing)]==0,"No","Yes"))
   }
   else{
     training <- df
@@ -57,12 +59,19 @@ weight_classification <- function(df,prop=0.05, file_name, C, gamma, weight_norm
       }
     }
   }
-  # cat(file_name, best_pred[8], best_pred[9], best_pred[6], best_pred[5], best_pred[10], best_pred[11],
-  #     best_pred[1], best_pred[2], best_pred[3], best_pred[4], best_pred[7],
-  #     "\n",file = "results/results_weights.txt", append = T, sep = ",")
+  if(test == T){
+    cm <- confusionMatrix(predict(model,testing[which(complete.cases(testing)),]),
+                          testing[which(complete.cases(testing)),ncol(testing)], positive = "Yes")
+    
+    params_test <- c(round(cm$table[1,1],2), round(cm$table[1,2],2),round(cm$table[2,1],2),
+                     round(cm$table[2,2],2), round(cm$byClass[4],2))
+  }
+  else params_test <- c()
+  # cat(file_name, best_pred[5], best_pred[6], best_pred[8], best_pred[9], best_pred[1], best_pred[2],
+  #     best_pred[3], best_pred[4],
+  #     best_pred[7], "\n",file = "results/results_SMOTE.txt", append = T, sep = ",")
   # cm
-  # cat("CCCCCCCCCCCCCCCCCCCCCCCCCC\n")
-  best_pred
+  list(best_pred, params_test)
 }
 
 cat("file,P0,P1,cost,gamma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n", file = "results/results_weights.txt",
