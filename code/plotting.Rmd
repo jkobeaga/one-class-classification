@@ -5,10 +5,16 @@ date: "May 31, 2017"
 output: pdf_document
 ---
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
 # Plotting Results
 
 En este documento analizaremos los resultados obtenidos anteriormente utilizando diferentes técnicas de anomaly detection.
 
+## Training
 ```{r}
 baseline_r <- read.csv("./results_training/results_baseline.txt", sep = ",")
 svdd_r <- read.csv("./results_training/results_svdd.txt", sep = ",")
@@ -44,9 +50,28 @@ smote_65_cr <- add_metric(smote_65_cr)
 weights_cr <- add_metric(weights_cr)
 ```
 
+### Recall
+#### Estadísticos
+Cálcularemos la media y la varianza del Recall.
+```{r}
+baseline_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall))
+svdd_r  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+oneclass_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_50_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_60_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_65_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+weights_r  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+lr_r %>% group_by(file, Corrected) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+svdd_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+oneclass_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_50_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_60_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_65_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+weights_cr  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+```
 
-Ahora para cada modelo, haremos gráficas de cajas para ver como actúa cada modelo..
-
+#### Boxplots
+Ahora para cada modelo, haremos gráficas de cajas para ver como actúa cada modelo.
 ```{r}
 baseline_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in baseline model")
 svdd_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SVDD model")
@@ -64,6 +89,30 @@ smote_65_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitl
 weights_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SVDD model")
 ```
 
+
+### F1
+#### Estadísticos
+Cálcularemos la media y la varianza de F1.
+```{r}
+baseline_r %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file, media, varianza)
+svdd_r  %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+oneclass_r %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+smote_50_r %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+smote_60_r %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+smote_65_r %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+weights_r  %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+lr_r %>% group_by(file, Corrected) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+svdd_cr %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+oneclass_cr %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+smote_50_cr %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+smote_60_cr %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+smote_65_cr %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+weights_cr  %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+```
+
+
+### Boxplots
+A continuación dibujaremos gráficas de cajas para la métrica F1.
 ```{r}
 baseline_r %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in baseline model")
 svdd_r %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in SVDD model")
@@ -76,6 +125,7 @@ oneclass_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F
 smote_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster SMOTE model")
 weights_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster Weights model")
 ```
+
 
 Vamos a escoger los mejores parámetros en cada datasets para hacer el training. Esto lo haremos en los siguientes datasets:
 baseline, svdd, oneclass,smote, weights
@@ -128,4 +178,6 @@ param_weights$P1 <- pivot$P1
 write.table(param_weights, file = "./results_training/parameters/weights.txt", row.names = F, sep = ",")
 
 ```
+
+
 

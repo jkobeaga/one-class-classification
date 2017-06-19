@@ -1,4 +1,5 @@
-cluster_svdd <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list, test = F){
+cluster_svdd <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list, test = F,
+                         metric = "recall"){
   # Load training and testing
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
@@ -54,7 +55,7 @@ cluster_svdd <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list,
     else{
       proportion <- round(length(which(train_clust[,ncol(train_clust)]=="1"))/dim(train_clust)[1],2)
       train_test <- svdd_classification(train_clust, file_name = file_name, C = C, nu_list = 0.01,
-                                        gamma_list = gamma_list, cluster = T)
+                                        gamma_list = gamma_list, cluster = T, metric = metric)
       params_train <- train_test[[1]]
       model <- svm(formulae, data = train_clust, type = "one-classification",
                    kernel = "radial", gamma= params_train[6], cost = params_train[5], cross=10)

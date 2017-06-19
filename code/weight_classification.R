@@ -1,5 +1,5 @@
 weight_classification <- function(df,prop=0.05, file_name, C, gamma, weight_normal, weight_anomaly,
-                                  test = F, cluster = T){
+                                  test = F, cluster = T, metric = "recall"){
   # cat("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
   if(cluster == F){
     training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
@@ -50,7 +50,7 @@ weight_classification <- function(df,prop=0.05, file_name, C, gamma, weight_norm
             pred2 <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
                        round(cm$table[2,2],2), cost, sig, round(cm$byClass[4],2), p0, p1, 
                        model$nSV[1], model$nSV[2])
-            best_pred <- best_prediction(best_pred, pred2)
+            best_pred <- best_prediction(best_pred, pred2, metric = metric)
             # cat("P0: ", best_pred[8], "P1: ", best_pred[9], "\n")
             
             

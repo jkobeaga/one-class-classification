@@ -1,4 +1,5 @@
-cluster_weight <- function(df,prop=0.05, file_name, C, gamma, weight_normal, weight_anomaly){
+cluster_weight <- function(df,prop=0.05, file_name, C, gamma, weight_normal, weight_anomaly,
+                           metric = "recall"){
   # Load training and testing
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
@@ -58,7 +59,7 @@ cluster_weight <- function(df,prop=0.05, file_name, C, gamma, weight_normal, wei
     else{
       train_test <- weight_classification(train_clust, file_name, C = C, gamma = gamma,
                                       weight_normal = weight_normal, weight_anomaly = weight_anomaly,
-                                      cluster = T)
+                                      cluster = T, metric = metric)
       params <- train_test[[1]]
       model <- svm(formulae, data = train_clust, kernel = "radial", gamma= params[6],
                    cost = params[5], class.weights = c("No" = params[8], "Yes" = params[9]),

@@ -1,4 +1,4 @@
-cluster_nu <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list){
+cluster_nu <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list, metric = "recall"){
   # Load training and testing
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
@@ -57,7 +57,7 @@ cluster_nu <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list){
     else{
       # cat(proportion,length(which(train_clust[,ncol(train_clust)]=="1")),dim(train_clust)[1], "\n")
       train_test <- nu_classification(train_clust, file_name, C = C, nu_list = proportion, gamma_list = gamma_list,
-                                    cluster = T)
+                                    cluster = T, metric = metric)
       params_train <- train_test[[1]]
       model <- svm(formulae, data = train_clust, type = "nu-classification",
                    kernel = "radial", nu = proportion, gamma= params_train[6], cost = params_train[5],

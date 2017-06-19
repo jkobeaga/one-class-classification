@@ -1,4 +1,4 @@
-cluster_smote <- function(df,prop=0.05, file_name, C, gamma_list, prop_majority){
+cluster_smote <- function(df,prop=0.05, file_name, C, gamma_list, prop_majority, metric = "recall"){
   # Load training and testing
   training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
   testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
@@ -77,7 +77,8 @@ cluster_smote <- function(df,prop=0.05, file_name, C, gamma_list, prop_majority)
       cat("After Smote Cluster:", dim(train_clust)[1],length(which(train_clust[,ncol(train_clust)]=="No")),"\n")
       proportion <- round(length(which(train_clust[,ncol(train_clust)]=="No"))/dim(train_clust)[1],2)
       train_test <- smote_classification(train_clust, file_name = file_name, cost_list = C,
-                                         gamma_list = gamma_list, prop_majority = prop_majority, cluster = T)
+                                         gamma_list = gamma_list, prop_majority = prop_majority,
+                                         cluster = T, metric = "recall")
       params <- train_test[[1]]
       model <- svm(formulae, data = train_clust,
                    kernel = "radial", gamma= params[6], cost = params[5], cross=10)

@@ -79,5 +79,13 @@ assign_label <- function(datasets, names, overwrite = F){
   }
 }
 
+# Create new train-test datasets
+for(j in 1:length(datasets)){
+  # cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
+  create_train_test(datasets[[j]], folder = datasets_names[j])
+}
+
+# update metadata
+frac_metadata(datasets, datasets_names)
 # Calculate the measures:
 assign_label(datasets, datasets_names, overwrite = F)

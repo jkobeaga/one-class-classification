@@ -1,5 +1,5 @@
 nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list,test= F,
-                              cluster = F){
+                              cluster = F, metric = "recall"){
   if(cluster == F){
     training <- read.csv(file = paste("./uci_datasets/", file_name, "/", "training.txt", sep = ""))
     testing <- read.csv(file = paste("./uci_datasets/", file_name, "/", "testing.txt", sep = ""))
@@ -39,7 +39,7 @@ nu_classification <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_
         else{
           pred2 <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
                          round(cm$table[2,2],2), cost, gam, nu, round(cm$byClass[4],2))
-          best_pred <- best_prediction(best_pred, pred2)
+          best_pred <- best_prediction(best_pred, pred2, metric = metric)
         }
       }
     }
