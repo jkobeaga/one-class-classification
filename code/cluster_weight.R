@@ -36,8 +36,6 @@ cluster_weight <- function(df,prop=0.05, file_name, C, gamma, weight_normal, wei
     # from test
     train_clust[,ncol(train_clust)] <- as.factor(as.character(train_clust[,ncol(train_clust)]))
     if(length(unique(train_clust[, ncol(train_clust)]))==1){
-      
-      train_clust[,ncol(train_clust)] <- as.factor(ifelse(train_clust[,ncol(train_clust)]==0,"No","Yes"))
       predictions_in <- as.character(train_clust[, ncol(train_clust)])
       predictions <- append(predictions, predictions_in)
       predictions_test <- c(predictions_test,
@@ -45,8 +43,9 @@ cluster_weight <- function(df,prop=0.05, file_name, C, gamma, weight_normal, wei
     }
     else if(dim(train_clust)[1]<10){
       warning("This cluster has less than 10 observations")
-      train_clust[,ncol(train_clust)] <- as.factor(ifelse(train_clust[,ncol(train_clust)]==0,"No","Yes"))
-      test_clust[,ncol(test_clust)] <- as.factor(ifelse(test_clust[,ncol(test_clust)]==0,"No","Yes"))
+      print(length(unique(train_clust[, ncol(train_clust)]))==1)
+      print(table(train_clust[,ncol(train_clust)]))
+      print(length(unique(train_clust[, ncol(train_clust)]))==1)
       if(table(train_clust[,ncol(train_clust)])[1]>table(train_clust[,ncol(train_clust)])[2]){
         predictions <- c(predictions, rep("No",dim(train_clust)[1]))
         predictions_test <- c(predictions_test, rep("No",dim(test_clust)[1]))
@@ -61,11 +60,9 @@ cluster_weight <- function(df,prop=0.05, file_name, C, gamma, weight_normal, wei
                                       weight_normal = weight_normal, weight_anomaly = weight_anomaly,
                                       cluster = T)
       params <- train_test[[1]]
-      print(params)
       model <- svm(formulae, data = train_clust, kernel = "radial", gamma= params[6],
                    cost = params[5], class.weights = c("No" = params[8], "Yes" = params[9]),
                    cross=10)
-      cat("AAAAAAAAAa")
       in_clus_pred <- as.character(predict(model,train_clust))
       predictions <- c(predictions, in_clus_pred)
       #  Test prediction

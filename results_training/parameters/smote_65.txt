@@ -1,9 +1,9 @@
 "file","cost","n","sigma"
 "biodegrad",0.5,10,0.1
-"blood_trans",0.5,9,0.1
-"breast",0.5,8,0.1
+"blood_trans",0.5,10,0.1
+"breast",0.5,10,0.1
 "ecoli",0.5,10,0.1
-"fertility",0.5,9,0.1
+"fertility",0.5,10,0.1
 "haberman",0.5,10,0.1
 "ionosphere",0.5,10,0.1
 "liver",0.5,10,0.1

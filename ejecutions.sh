@@ -1,10 +1,11 @@
+#!/bin/sh
 ########## BIODEGRAD ################ string-->float error (removing features 12,14,30 it works)
 
 frac/detect -X ../../one-class-classification/uci_datasets/biodegrad/FRaC/training_frac -Q ../../one-class-classification/uci_datasets/biodegrad/FRaC/testing_frac -d ',' -m ../../one-class-classification/uci_datasets/biodegrad/FRaC/metadata -T -w ~/Development/Weka/weka-3-8-1/weka.jar -o ../../one-class-classification/uci_datasets/biodegrad/FRaC/biodegrad_predictions
 
 ########### BLOOD TRANSFUSION ############### OK
 
-frac/detect -X ../../one-class-classification/uci_datasets/blood_trans/FRaC/training_frac -Q ../../one-class-classification/uci_datasets/blood_trans/FRaC/testing_frac -d ',' -m ../../one-class-classification/uci_datasets/blood_trans/FRaC/metadata -T -w ~/Development/Weka/weka-3-8-1/weka.jar -o ../../one-class-classification/uci_datasets/blood_trans/FRaC/blood_predictions
+frac/detect -X ../../one-class-classification/uci_datasets/blood_trans/FRaC/training_frac -Q ../../one-class-classification/uci_datasets/blood_trans/FRaC/testing_frac -d ',' -m ../../one-class-classification/uci_datasets/blood_trans/FRaC/metadata -T -w ~/Development/Weka/weka-3-8-1/weka.jar -o ../../one-class-classification/uci_datasets/blood_trans/FRaC/blood_trans_predictions
 
 ########### BREAST ############ OK
 

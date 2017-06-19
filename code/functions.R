@@ -16,53 +16,6 @@ scale_df <- function(df){
   df
 }
 
-# Create metadata for FRaC
-frac_metadata <- function(datas, names){
-  for(j in 1:length(datas)){
-    df <- datas[[j]]
-    values <- unique(df[,1])
-    if(length(values)<8 | is.integer(df[,1])){
-      if(length(values)>1){
-        input <- paste(1, "\tnominal\t",paste(sort(values),collapse = ","), sep = "")
-        write <- TRUE
-      }
-      
-    }
-    else{
-      input <- paste(1, "\tcontinuous\t", round(min(df[,1]),2), ",", round(max(df[,1]),2),
-                     sep = "")
-      write <- TRUE
-    }
-    if(write == TRUE){
-      write.table(input, file = paste("./uci_datasets/",names[j],"/FRaC/metadata", sep = ""),
-                  quote =  F, row.names = F, col.names = F)  
-      write <- FALSE
-    }
-    
-    for(i in 2:(ncol(df)-1)){
-      values <- unique(df[,i])
-      # cat(names[j]," Variable: ", i," Valores: ", values, "\n")
-      if(length(values)<8 | is.integer(df[,i])){
-        if(length(values)>1){
-          write <- TRUE
-          input <- paste(i, "\tnominal\t", paste(sort(values),collapse = ","), sep = "")
-        }
-      }
-      else{
-        write <- TRUE
-        input <- paste(i, "\tcontinuous\t", round(min(df[,i]),2), ",", round(max(df[,i]),2),
-                       sep = "")
-      }
-      if(write == TRUE){
-        write.table(input, file = paste("./uci_datasets/",names[j],"/FRaC/metadata", sep = ""),
-                    quote =  F, row.names = F, col.names = F, append = T)
-        write <- FALSE
-      }
-      
-    }
-  }
-}
-
 
 # Assign cluster to each observation
 cluster_assign <- function(df,name){
@@ -133,6 +86,7 @@ add_metric <- function(df){
 
 
 # Write results for each technique in a file. When clustering is required it also test the model.
+# prop_majority is the proportion of the majority class in SMOTE
 write_result_train <- function(datasets, names, baseline = F, svdd = F, one_class = F,  smote = F,
                          weights = F, logistic = F, autoencoder = F, all = F, cluster = F,
                          prop_majority = 50, first){
@@ -142,8 +96,9 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
     if(first == T)cat("file,cost,sigma,TN,FN,FP,TP,Kappa,\n",
                      file = "results_training/results_baseline.txt", append = F)
     for(i in 1:length(datasets)){
-      bl_model <- baseline_classification(datasets[[i]], file_name = datasets_names[i],
+      train_test <- baseline_classification(datasets[[i]], file_name = datasets_names[i],
                                           C = C, sigma =sigma) 
+      bl_model <- train_test[[1]]
       cat(datasets_names[i], bl_model[1], bl_model[2], bl_model[3], bl_model[4], bl_model[5],
           bl_model[6], bl_model[7], "\n",
           file = "results_training//results_baseline.txt", append = T, sep = ",")
@@ -182,8 +137,9 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
                         file = "results_training//results_svdd.txt",
                         append = F)
       for(i in 1:length(datasets)){
-        svdd_model <- svdd_classification(datasets[[i]], file_name = datasets_names[i], C = C,
+        train_test <- svdd_classification(datasets[[i]], file_name = datasets_names[i], C = C,
                                           gamma_list = gamma_list, cluster = F)
+        svdd_model <- train_test[[1]]
         cat(datasets_names[i], svdd_model[5], svdd_model[6], svdd_model[7], svdd_model[1],
             svdd_model[2], svdd_model[3], svdd_model[4], svdd_model[8], "\n",
             file = "results_training//results_svdd.txt",
@@ -223,8 +179,9 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
       if(first == T)cat("file,cost,gamma,nu,TN,FN,FP,TP,Kappa,\n",
                         file = "results_training/results_Scholkopf.txt", append = F)
       for(i in 1:length(datasets)){
-        oc_model <- nu_classification(datasets[[i]], file_name = datasets_names[i], C = C,
+        train_test <- nu_classification(datasets[[i]], file_name = datasets_names[i], C = C,
                                         gamma_list = gamma_list, cluster = F)
+        oc_model <- train_test[[1]]
         cat(datasets_names[i], oc_model[5], oc_model[6], oc_model[7],oc_model[1], oc_model[2],
             oc_model[3], oc_model[4],oc_model[8], "\n",file = "results_training/results_Scholkopf.txt",
             append = T, sep = ",")
@@ -264,9 +221,10 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
       if(first == T)cat("file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n",
                         file = location, append = F)
       for(i in 1:length(datasets)){
-        smote_model <- smote_classification(datasets[[i]], file_name = datasets_names[i],
+        train_test <- smote_classification(datasets[[i]], file_name = datasets_names[i],
                                             cost_list = cost_list, gamma_list = sigma_list,
                                             prop_majority = prop_majority, cluster = F)
+        smote_model <- train_test[[1]]
         cat(datasets_names[i], smote_model[5], smote_model[6], smote_model[8], smote_model[9],
             smote_model[1], smote_model[2], smote_model[3], smote_model[4], smote_model[7],
             "\n",file = location, append = T, sep = ",")
@@ -305,9 +263,10 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
       if(first == T)cat("file,P0,P1,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n",
                         file = "results_training/results_weights.txt", append = F)
       for(i in 1:length(datasets)){
-        weight_model <- weight_classification(datasets[[i]], file_name = datasets_names[i], C = C,
+        train_test <- weight_classification(datasets[[i]], file_name = datasets_names[i], C = C,
                                               gamma = gamma_list, weight_normal = weight_normal,
                                               weight_anomaly = weight_anomaly, cluster = F)
+        weight_model <- train_test[[1]]
         cat(datasets_names[i], weight_model[8], weight_model[9], weight_model[6], weight_model[5],
             weight_model[10], weight_model[11], weight_model[1], weight_model[2], weight_model[3],
             weight_model[4], weight_model[7], "\n",file = "results_training/results_weights.txt",
@@ -316,14 +275,24 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
     }
   }
   if(logistic == T){
-    if(first == T)cat("file,Corrected,TN,FN,FP,TP,Kappa,\n", file = "results_training//results_LR.txt",
-                      append = F)
+    if(first == T){
+      cat("file,Corrected,TN,FN,FP,TP,Kappa,\n", file = "results_training/results_LR.txt",
+          append = F)
+      cat("file,Corrected,TN,FN,FP,TP,Kappa,\n", file = "results_testing/results_LR.txt",
+          append = F)
+    }
     for(i in 1:length(datasets)){
       lr_model <- LR_classification(datasets[[i]], file_name = datasets_names[i])
+      # Write results of training
       cat(datasets_names[i],"F", lr_model[1], lr_model[2], lr_model[3], lr_model[4], lr_model[5],
-          "\n",  file = "results_training//results_LR.txt", append = T, sep = ",")
-      cat(datasets_names[i],"T", lr_model[6], lr_model[7], lr_model[8], lr_model[9], lr_model[10],
-          "\n",  file = "results_training//results_LR.txt", append = T, sep = ",")
+          "\n",  file = "results_training/results_LR.txt", append = T, sep = ",")
+      cat(datasets_names[i],"T", lr_model[11], lr_model[12], lr_model[13], lr_model[14], lr_model[15],
+          "\n",  file = "results_training/results_LR.txt", append = T, sep = ",")
+      # Write results of testing
+      cat(datasets_names[i],"F", lr_model[6], lr_model[7], lr_model[8], lr_model[9], lr_model[10],
+          "\n",  file = "results_testing/results_LR.txt", append = T, sep = ",")
+      cat(datasets_names[i],"T", lr_model[16], lr_model[17], lr_model[18], lr_model[19], lr_model[20],
+          "\n",  file = "results_testing/results_LR.txt", append = T, sep = ",")
       
     }
   }
@@ -366,7 +335,7 @@ for(i in 1:10){
   write_result_train(datasets, datasets_names, smote = T, cluster = T, first = fold1,
                      prop_majority = 65)
   cat("cluster smote 50\n")
-  write_result_train(datasets, datasets_names, weights = T, cluster = T, first = F)
+    write_result_train(datasets, datasets_names, weights = T, cluster = T, first = fold1)
   cat("cluster\n")
 }
 
@@ -390,100 +359,48 @@ write_result_test <-  function(datasets, names, baseline = F, svdd = F, one_clas
     } 
   }
   if(svdd == T){
-    if(cluster == T){
-      if(first == T)cat("file,TN,FP,FN,TP,Kappa,\n", file = "results_testing/results_cluster_svdd.txt",
-                        append = F)
-      # nu_list <- seq(0.01,0.2,0.02)
-      gamma_list <- seq(0.1,0.6,0.05)
-      C <- c(seq(0.01,0.2,0.02))
-      for(i in 1:length(datasets)){
-        train_test <- cluster_svdd(datasets[[i]], file_name = datasets_names[i], C,
-                                         nu_list = prop, gamma_list = gamma_list)
-        clust_svdd_model <- train_test[[2]]
-        cat(datasets_names[i], clust_svdd_model[1], clust_svdd_model[2], clust_svdd_model[3],
-            clust_svdd_model[4], clust_svdd_model[5], "\n",
-            file = "results_testing/results_cluster_svdd.txt",
-            append = T, sep = ",")}
-      
-    }
-    else{
-      params <- read.csv("results_training/parameters/svdd.txt", sep = ",")
-      if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n", file = "results_testing/results_svdd.txt",
-                        append = F)
-      for(i in 1:length(datasets)){
-        cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
-        sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
-        train_test <- svdd_classification(datasets[[i]], file_name = datasets_names[i], C = cost_list,
-                                          gamma_list = sigma_list, test = T, cluster = F)
-        svdd_model <- train_test[[2]]
-        cat(datasets_names[i], svdd_model[1], svdd_model[2], svdd_model[3], svdd_model[4],
-            svdd_model[5], "\n",file = "results_testing/results_svdd.txt", append = T, sep = ",")
-      }
+    params <- read.csv("results_training/parameters/svdd.txt", sep = ",")
+    if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n", file = "results_testing/results_svdd.txt",
+                      append = F)
+    for(i in 1:length(datasets)){
+      cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
+      sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
+      train_test <- svdd_classification(datasets[[i]], file_name = datasets_names[i], C = cost_list,
+                                        gamma_list = sigma_list, test = T, cluster = F)
+      svdd_model <- train_test[[2]]
+      cat(datasets_names[i], svdd_model[1], svdd_model[2], svdd_model[3], svdd_model[4],
+          svdd_model[5], "\n",file = "results_testing/results_svdd.txt", append = T, sep = ",")
     }
   }
   if(one_class == T){
-    if(cluster == T){
-      if(first == T)cat("file,TN,FP,FN,TP,Kappa,\n", file = "results/results_cluster_Scholkopf.txt",
-                        append = F)
-      # nu_list <- seq(0.01,0.2,0.02)
-      gamma_list <- seq(0.1,5,0.3)
-      C <- c(seq(0.01,3,0.2))
-      for(i in 1:length(datasets)){
-        clust_svdd_model <- cluster_nu(datasets[[i]], file_name = datasets_names[i], C = C,
-                                       nu_list = prop, gamma_list = gamma_list)
-        cat(datasets_names[i], clust_svdd_model[1], clust_svdd_model[2], clust_svdd_model[3],
-            clust_svdd_model[4], clust_svdd_model[5], "\n",file = "results/results_cluster_Scholkopf.txt",
-            append = T, sep = ",")}
-      
-    }
-    else{
-      params <- read.csv("results_training/parameters/oneclass.txt", sep = ",")
-      if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n",
-                        file = "results_testing/results_Scholkopf.txt", append = F)
-      for(i in 1:length(datasets)){
-        cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
-        sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
-        train_test <- nu_classification(datasets[[i]], file_name = datasets_names[i], C = cost_list,
-                                      gamma_list = sigma_list, test = T, cluster = F)
-        oc_model <- train_test[[2]]
-        cat(datasets_names[i],oc_model[1], oc_model[2], oc_model[3], oc_model[4],oc_model[5],
-            "\n",file = "results_testing/results_Scholkopf.txt", append = T, sep = ",")
-      }
+    params <- read.csv("results_training/parameters/oneclass.txt", sep = ",")
+    if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n",
+                      file = "results_testing/results_Scholkopf.txt", append = F)
+    for(i in 1:length(datasets)){
+      cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
+      sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
+      train_test <- nu_classification(datasets[[i]], file_name = datasets_names[i], C = cost_list,
+                                    gamma_list = sigma_list, test = T, cluster = F)
+      oc_model <- train_test[[2]]
+      cat(datasets_names[i],oc_model[1], oc_model[2], oc_model[3], oc_model[4],oc_model[5],
+          "\n",file = "results_testing/results_Scholkopf.txt", append = T, sep = ",")
     }
   }
   if(smote == T){
-    if(cluster == T){
-      # gamma_list <- seq(0.1,0.6,0.05)
-      # C <- c(seq(0.01,0.2,0.02))
-      gamma_list <- seq(0.6,1,0.05)
-      C <- c(seq(0.2,0.6,0.02))
-      location <- paste( "results_training/results_cluster_SMOTE_", prop_majority, ".txt", sep="")
-      if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n",file = location, append = F)
-      for(i in 1:length(datasets)){
-        cluster_smote_model <- cluster_smote(datasets[[i]], file_name = datasets_names[i], C = C,
-                                             gamma_list = gamma_list, prop_majority = prop_majority)
-        cat(datasets_names[i],cluster_smote_model[1], cluster_smote_model[2], cluster_smote_model[3],
-            cluster_smote_model[4], cluster_smote_model[7],
-            "\n",file = location, append = T, sep = ",")
-      }
-    }
-    
-    else{
-      location_params <- paste("results_training/parameters/smote_", prop_majority, ".txt", sep = "")
-      params <- read.csv(location_params, sep = ",")
-      location <- paste( "results_testing/results_SMOTE_", prop_majority, ".txt", sep="")
-      if(first == T)cat("file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n",
-                        file = location, append = F)
-      for(i in 1:length(datasets)){
-        cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
-        sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
-        train_test <- smote_classification(datasets[[i]], file_name = datasets_names[i],
-                                            cost_list = cost_list, gamma_list = sigma_list,
-                                            prop_majority = prop_majority, test = T, cluster = F)
-        smote_model <- train_test[[2]]
-        cat(datasets_names[i], smote_model[1], smote_model[2], smote_model[3],
-            smote_model[4], smote_model[5], "\n",file = location, append = T, sep = ",")
-      }
+    location_params <- paste("results_training/parameters/smote_", prop_majority, ".txt", sep = "")
+    params <- read.csv(location_params, sep = ",")
+    location <- paste( "results_testing/results_SMOTE_", prop_majority, ".txt", sep="")
+    if(first == T)cat("file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n",
+                      file = location, append = F)
+    for(i in 1:length(datasets)){
+      cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
+      sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
+      train_test <- smote_classification(datasets[[i]], file_name = datasets_names[i],
+                                          cost_list = cost_list, gamma_list = sigma_list,
+                                          prop_majority = prop_majority, test = T, cluster = F)
+      smote_model <- train_test[[2]]
+      cat(datasets_names[i], smote_model[1], smote_model[2], smote_model[3],
+          smote_model[4], smote_model[5], "\n",file = location, append = T, sep = ",")
     }
   }
   if(weights == T){
@@ -492,51 +409,27 @@ write_result_test <-  function(datasets, names, baseline = F, svdd = F, one_clas
     weight_normal <- c(0.5,1)
     weight_anomaly <- seq(2,20,2)
     params <- read.csv("results_training/parameters/weights.txt", sep = ",")
-    if(cluster == T){
-      if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n",file = "results/results_cluster_weights.txt",
-                        append = F)
-      for(i in 1:length(datasets)){
-        cluster_weight_model <- cluster_weight(datasets[[i]], file_name = datasets_names[i], C = C,
-                                               gamma = gamma_list, weight_normal = weight_normal,
-                                               weight_anomaly = weight_anomaly)
-        # cluster_weight_model <- cluster_weight(datasets[[i]], file_name = datasets_names[i], C = C,
-        #                                      gamma_list = gamma_list)
-        cat(datasets_names[i],cluster_weight_model[1], cluster_weight_model[2],
-            cluster_weight_model[3], cluster_weight_model[4], cluster_weight_model[5],
-            "\n",file = "results/results_cluster_weights.txt", append = T, sep = ",")
-      }
-    }
-    else{
-      
-      if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n",
-                        file = "results_testing/results_weights.txt", append = F)
-      for(i in 1:length(datasets)){
-        cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
-        sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
-        weight_normal <- params[which(params$file == names[i]),match("P0", colnames(params))]
-        weight_anomaly <- params[which(params$file == names[i]),match("P1", colnames(params))]
-        weight_model <- weight_classification(datasets[[i]], file_name = datasets_names[i], C = C,
-                                              gamma = gamma_list, weight_normal = weight_normal,
-                                              weight_anomaly = weight_anomaly, cluster = F)
-        cat(datasets_names[i],weight_model[1], weight_model[2], weight_model[3],
-            weight_model[4], weight_model[5], "\n",file = "results_testing/results_weights.txt", append = T,
-            sep = ",")
-      }
-    }
-  }
-  if(logistic == T){
-    if(first == T)cat("file,Corrected,TN,FN,FP,TP,Kappa,\n", file = "results/results_LR.txt",
-                      append = F)
+    if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n",
+                      file = "results_testing/results_weights.txt", append = F)
     for(i in 1:length(datasets)){
-      lr_model <- LR_classification(datasets[[i]], file_name = datasets_names[i])
-      cat(datasets_names[i],"F", lr_model[1], lr_model[2], lr_model[3], lr_model[4], lr_model[5],
-          "\n",  file = "results/results_LR.txt", append = T, sep = ",")
-      cat(datasets_names[i],"T", lr_model[6], lr_model[7], lr_model[8], lr_model[9], lr_model[10],
-          "\n",  file = "results/results_LR.txt", append = T, sep = ",")
-      
+      cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
+      sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
+      weight_normal <- params[which(params$file == names[i]),match("P0", colnames(params))]
+      weight_anomaly <- params[which(params$file == names[i]),match("P1", colnames(params))]
+      weight_model <- weight_classification(datasets[[i]], file_name = datasets_names[i], C = C,
+                                            gamma = gamma_list, weight_normal = weight_normal,
+                                            weight_anomaly = weight_anomaly, cluster = F)
+      cat(datasets_names[i],weight_model[1], weight_model[2], weight_model[3],
+          weight_model[4], weight_model[5], "\n",file = "results_testing/results_weights.txt", append = T,
+          sep = ",")
     }
   }
 }
 
+write_result_test(datasets, datasets_names, baseline = T, first = fold1)
+write_result_test(datasets, datasets_names, svdd = T, first = fold1)
 write_result_test(datasets, datasets_names, one_class = T, first = fold1)
-write_result_test(datasets, datasets_names, weights = T, first = fold1, prop_majority = 50)
+write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 50)
+write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 60)
+write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 65)
+write_result_test(datasets, datasets_names, weights = T, first = fold1, prop_majority = 65)

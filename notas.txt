@@ -3,3 +3,17 @@
 ########################################
 
 Al tener tan pocos datos hay mucha variabilidad en las metricas.
+
+
+
+
+########################################
+		PASOS A SEGUIR
+########################################
+
+1.- ejecutar la función write_result_train(). Esta función entrena los modelos y escribe los resultados de TRAIN en los ficheros de resutlados de cada modelo. En el caso de que los modelos tengan clustering y en el caso de LR, entrena los modelos en cada cluster y escribe los resultados de TRAIN y TEST de cada modelo.
+2.-Calcular los mejores parámetros para cada modelo. Esto se hace en ejecutando el chunk del archivo plotting.Rmd. Así se obtienen los mejores parámetros pero sólo para los modelos baseline, SVDD, One-Class, Smote-50, Smote-60, Smote-65, Weights, porque con Linear Regression no hay parámetros y en los modeos que se combinan con clustering el training y el testing se hace conjuntamente.
+3.- Utilizando los mejores parámetros se calculan los resultados de test con la función write_results_test()
+4.- Entre los pasos 1 y 2 hay que hacer gráficas para analizar los resultados obtenidos en train. Después de obtener los resultados de test también hay que hacer gráficos para analizar los resultados.
+
+PD: En el caso de FRaC, no se tienen los resultados de train únicamente se tienen los resultados de testing.

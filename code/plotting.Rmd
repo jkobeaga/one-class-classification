@@ -77,7 +77,7 @@ smote_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 i
 weights_cr %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster Weights model")
 ```
 
-Vamos a escoger los mejores parámetros en cada datasets para hacer el training. ESto lo haremos en los siguientes datasets:
+Vamos a escoger los mejores parámetros en cada datasets para hacer el training. Esto lo haremos en los siguientes datasets:
 baseline, svdd, oneclass,smote, weights
 
 ```{r}
