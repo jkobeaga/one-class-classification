@@ -1,8 +1,0 @@
-- Scholkopf,mu-classification
-- SVDD
-- SMOTE
-- Different weights
-- DBN + SVDD/Scholkopf
-- Cascada
-- Logistic Regression + correction
-- FRaC
