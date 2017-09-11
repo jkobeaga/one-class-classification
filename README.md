@@ -1,4 +1,4 @@
-one-class classification
+# Anomaly Detection
 
 In this repository we will compare different techniques for anomaly detection. The techniques we have used for the review are: SMOTE, SVDD, PSVM, FRaC, Logistic Regression with corrections, DBN and clustering with one of these techniques.
 
