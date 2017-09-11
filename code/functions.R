@@ -1,3 +1,6 @@
+# In this file you will find all the necessary functions to preprocces the data and fit
+# the models.
+
 # To scale data into [0,1]
 scale_df <- function(df){
   num_col <- c()
@@ -19,12 +22,11 @@ scale_df <- function(df){
 
 # Assign cluster to each observation
 cluster_assign <- function(df,name){
-  results <- read.table(file = "./results_training/clusters.txt", sep = ",")
+  results <- read.table(file = "./results/clusters.txt", sep = ",")
   num_clusters <- as.numeric(results[which(results[,1] == name),2])+1
   km <- kmeans(df[,-ncol(df)], centers = num_clusters, iter.max = 20, nstart = 25)
   df$cluster <- as.factor(km$cluster)
   df <- df[order(df$cluster),]
-  # df$id <- seq(1,dim(df)[1])
   df
 }
 
@@ -41,28 +43,42 @@ predict_cluster <- function(train, test){
 }
 
 
-# Get the best prediction between two, by default considered metric is recall
+# Get the best prediction between two, considered metric by default is recall.
 best_prediction <- function(pred1, pred2, metric = "recall"){
-  if(metric == "recall") recall <- T
-  if(metric == "F1") F1 <- T
-  if(metric == "accuracy") accuracy <- T
   pred1 <- as.numeric(pred1)
   pred2 <- as.numeric(pred2)
-  if(recall == T){
+  if(metric == "recall"){
     recall_1 <- pred1[4]/(pred1[2] + pred1[4])
     recall_2 <- pred2[4]/(pred2[2] + pred2[4])
     if(recall_1>=recall_2) best_pred <- pred1
     else best_pred <- pred2
   }
-  else if(F1 == T){
-    precision_1 <- pred1[4]/(pred1[4]+pred1[3])
-    recall_1 <- pred1[4]/(pred1[2] + pred1[4])
-    precision_2 <- pred2[4]/(pred2[4]+pred2[3])
-    recall_2 <- pred2[4]/(pred2[2] + pred2[4])
-    
-    F1_1 <- 2*precision_1*recall_1/(precision_1+recall_1)
-    F1_2 <- 2*precision_2*recall_2/(precision_2+recall_2)
+  else if(metric == "F1"){
+    if(pred1[4]==0){
+      F1_1 <- 0
+    }
+    else{
+      precision_1 <- pred1[4]/(pred1[4]+pred1[3])
+      recall_1 <- pred1[4]/(pred1[2] + pred1[4])
+      F1_1 <- 2*precision_1*recall_1/(precision_1+recall_1)
+      
+    }
+    if(pred2[4]==0){
+      F1_2 <- 0
+    }
+    else{
+      precision_2 <- pred2[4]/(pred2[4]+pred2[3])
+      recall_2 <- pred2[4]/(pred2[2] + pred2[4])
+      F1_2 <- 2*precision_2*recall_2/(precision_2+recall_2)
+    }
     if(F1_1>=F1_2) best_pred <- pred1
+    else best_pred <- pred2
+  }
+  else if(metric == "jaccard"){
+    jaccard_1 <- pred1[4]/(pred1[2] + pred1[3] + pred1[4])    
+    jaccard_2 <- pred2[4]/(pred2[2] + pred2[3] + pred2[4])    
+    
+    if(jaccard_1 >= jaccard_2) best_pred <- pred1
     else best_pred <- pred2
   }
   else{
@@ -71,6 +87,7 @@ best_prediction <- function(pred1, pred2, metric = "recall"){
     if(accuracy_1 >= accuracy_2) best_pred <- pred1
     else best_pred <- pred2
   }
+  cat(best_pred,"\n")
   best_pred
 }
 
@@ -83,6 +100,8 @@ add_metric <- function(df){
   df$recall <- tp/(tp+fn)
   df$precision <- tp/(tp+fp)
   df$F1 <- 2*df$recall*df$precision/(df$recall+df$precision)
+  df$jaccard <- tp/(fp+fn+tp)
+  df[is.na(df)] <- 0
   df
   
 }
@@ -107,7 +126,6 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
           bl_model[6], bl_model[7], "\n",
           file = paste("./results/",metric,"/training/results_baseline.txt", sep = ""),
           append = T, sep = ",")
-      # cat(bl_model[8], bl_model[9],"\n")
     } 
   }
   if(svdd == T){
@@ -120,7 +138,6 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
             file = paste("./results/",metric,"/testing/results_cluster_svdd.txt", sep = ""),
             append = F)
         }
-      # nu_list <- seq(0.01,0.2,0.02)
       gamma_list <- seq(0.1,0.6,0.05)
       C <- c(seq(0.01,0.2,0.02))
       for(i in 1:length(datasets)){
@@ -166,7 +183,6 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
             file = paste("./results/",metric,"/testing/results_cluster_Scholkopf.txt", sep = ""),
             append = F)
       }
-      # nu_list <- seq(0.01,0.2,0.02)
       gamma_list <- seq(0.1,5,0.3)
       C <- c(seq(0.01,3,0.2))
       for(i in 1:length(datasets)){
@@ -204,8 +220,6 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
   }
   if(smote == T){
     if(cluster == T){
-      # gamma_list <- seq(0.1,0.6,0.05)
-      # C <- c(seq(0.01,0.2,0.02))
       gamma_list <- seq(0.6,1,0.05)
       C <- c(seq(0.2,0.6,0.02))
       location <- paste( "./results/",metric,"/training/results_cluster_SMOTE_", prop_majority, ".txt",
@@ -264,8 +278,6 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
         train_test <- cluster_weight(datasets[[i]], file_name = datasets_names[i], C = C,
                                                gamma = gamma_list, weight_normal = weight_normal,
                                                weight_anomaly = weight_anomaly)
-        # cluster_weight_model <- cluster_weight(datasets[[i]], file_name = datasets_names[i], C = C,
-        #                                      gamma_list = gamma_list)
         cluster_weight_model <- train_test[[1]]
         cat(datasets_names[i],cluster_weight_model[1], cluster_weight_model[2],
             cluster_weight_model[3], cluster_weight_model[4], cluster_weight_model[5],
@@ -290,7 +302,7 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
         cat(datasets_names[i], weight_model[8], weight_model[9], weight_model[6], weight_model[5],
             weight_model[10], weight_model[11], weight_model[1], weight_model[2], weight_model[3],
             weight_model[4], weight_model[7], "\n",
-            paste("./results/",metric,"/training/results_weights.txt",sep = ""),
+            file = paste("./results/",metric,"/training/results_weights.txt",sep = ""),
             append = T, sep = ",")
       }
     }
@@ -323,51 +335,74 @@ write_result_train <- function(datasets, names, baseline = F, svdd = F, one_clas
       
     }
   }
+  if(autoencoder == T){
+    if(first == T){
+      cat("file,L1,L2,L3,TN,FN,FP,TP,Kappa,\n",
+          file = paste("./results/",metric, "/training/results_autoencoder.txt", sep = ""),
+          append = F)
+    }
+    for(i in 1:length(datasets)){
+      train_test <- autoencoder_classification(datasets[[i]], file_name = datasets_names[i],
+                                             metric = metric)
+      ae_model <- train_test[[1]]
+      # Write results of training
+      cat(datasets_names[i], ae_model[5], ae_model[6], ae_model[7], ae_model[1], ae_model[2],
+          ae_model[3], ae_model[4], ae_model[8],"\n",
+          file = paste("./results/",metric, "/training/results_autoencoder.txt", sep = ""),
+          append = T, sep = ",")
+      
+    }
+
+    
+  }
 }
 
 # Obtain resuts from training and some cases also for testing
-for(i in 9:10){
+for(i in 8:10){
   for(j in 1:length(datasets)){
-    # cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
     create_train_test(datasets[[j]], folder = datasets_names[j])
   }
   cat("iteration: ",i, "\n")
   fold1 <- ifelse(i == 1, T, F)
-  write_result_train(datasets, datasets_names, baseline = T, first = fold1, metric = "recall")
+  write_result_train(datasets, datasets_names, baseline = T, first = fold1, metric = "jaccard")
   cat("baseline\n")
-  write_result_train(datasets, datasets_names, svdd = T, first = fold1, metric = "recall")
+  write_result_train(datasets, datasets_names, svdd = T, first = fold1, metric = "jaccard")
   cat("svdd\n")
-  write_result_train(datasets, datasets_names, one_class = T, first = fold1, metric = "recall")
+  write_result_train(datasets, datasets_names, one_class = T, first = fold1, metric = "jaccard")
   cat("one-class\n")
   write_result_train(datasets, datasets_names, smote = T, first = fold1, prop_majority = 50,
-                     metric = "recall")
+                     metric = "jaccard")
   cat("smote 70\n")
   write_result_train(datasets, datasets_names, smote = T, first = fold1, prop_majority = 60,
-                     metric = "recall")
+                     metric = "jaccard")
   cat("smote 50\n")
   write_result_train(datasets, datasets_names, smote = T, first = fold1, prop_majority = 65,
-                     metric = "recall")
+                     metric = "jaccard")
   cat("smote 50\n")
-  write_result_train(datasets, datasets_names, weights = T, first = fold1, metric = "recall")
+  write_result_train(datasets, datasets_names, weights = T, first = fold1, metric = "jaccard")
   cat("weights\n")
-  write_result_train(datasets, datasets_names, logistic = T, first = fold1, metric = "recall")
+  write_result_train(datasets, datasets_names, logistic = T, first = fold1, metric = "jaccard")
   cat("logistic\n")
   write_result_train(datasets, datasets_names, svdd = T, cluster = T, first = fold1,
-                     metric = "recall")
+                     metric = "jaccard")
   cat("cluster svdd\n")
-  write_result_train(datasets, datasets_names, one_class = T, cluster = T, first = fold1)
+  write_result_train(datasets, datasets_names, one_class = T, cluster = T, first = fold1,
+                     metric = "jaccard")
   cat("cluster one-class\n")
   write_result_train(datasets, datasets_names, smote = T, cluster = T, first = fold1,
-                     prop_majority = 50, metric = "recall")
-  cat("cluster smote 70\n")
+                     prop_majority = 50, metric = "jaccard")
+  cat("cluster smote 50\n")
   write_result_train(datasets, datasets_names, smote = T, cluster = T, first = fold1,
-                     prop_majority = 60, metric = "recall")
+                     prop_majority = 60, metric = "jaccard")
   cat("cluster smote 60\n")
   write_result_train(datasets, datasets_names, smote = T, cluster = T, first = fold1,
-                     prop_majority = 65, metric = "recall")
-  cat("cluster smote 50\n")
+                     prop_majority = 65, metric = "jaccard")
+  cat("cluster smote 65\n")
     write_result_train(datasets, datasets_names, weights = T, cluster = T, first = fold1,
-                       metric = "recall")
+                       metric = "jaccard")
+  cat("cluster\n")
+  write_result_train(datasets, datasets_names, autoencoder = T, first = fold1,
+                       metric = "jaccard")
   cat("cluster\n")
 }
 
@@ -390,7 +425,6 @@ write_result_test <-  function(datasets, names, baseline = F, svdd = F, one_clas
       cat(datasets_names[i], bl_model[1], bl_model[2], bl_model[3],bl_model[4], bl_model[5], "\n",
           file = paste("./results/",metric,"/testing/results_baseline.txt", sep = ""),
           append = T, sep = ",")
-      # cat(bl_model[8], bl_model[9],"\n")
     } 
   }
   if(svdd == T){
@@ -434,10 +468,10 @@ write_result_test <-  function(datasets, names, baseline = F, svdd = F, one_clas
     if(first == T)cat("file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,\n",
                       file = location, append = F)
     for(i in 1:length(datasets)){
-      cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
-      sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
+      cost <- params[which(params$file == names[i]),match("cost", colnames(params))]
+      sigma <- params[which(params$file == names[i]),match("sigma", colnames(params))]
       train_test <- smote_classification(datasets[[i]], file_name = datasets_names[i],
-                                          cost_list = cost_list, gamma_list = sigma_list,
+                                          cost_list = cost, gamma_list = sigma,
                                           prop_majority = prop_majority, test = T, cluster = F)
       smote_model <- train_test[[2]]
       cat(datasets_names[i], smote_model[1], smote_model[2], smote_model[3],
@@ -445,48 +479,67 @@ write_result_test <-  function(datasets, names, baseline = F, svdd = F, one_clas
     }
   }
   if(weights == T){
-    C=seq(0.5,3,0.5)
-    gamma_list=seq(0.1,1,0.3)
-    weight_normal <- c(0.5,1)
-    weight_anomaly <- seq(2,20,2)
     params <- read.csv(paste("./results/",metric,"/training/parameters/weights.txt",sep = ""),
                        sep = ",")
     if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n",
                       file = paste("./results/",metric, "/testing/results_weights.txt",sep = ""),
                       append = F)
     for(i in 1:length(datasets)){
-      cost_list <- params[which(params$file == names[i]),match("cost", colnames(params))]
-      sigma_list <- params[which(params$file == names[i]),match("sigma", colnames(params))]
-      weight_normal <- params[which(params$file == names[i]),match("P0", colnames(params))]
-      weight_anomaly <- params[which(params$file == names[i]),match("P1", colnames(params))]
-      train_test <- weight_classification(datasets[[i]], file_name = datasets_names[i], C = C,
-                                            gamma = gamma_list, weight_normal = weight_normal,
-                                            weight_anomaly = weight_anomaly, cluster = F, test = T)
+      cost <- params[which(params$file == names[i]),match("cost", colnames(params))]
+      sigma <- params[which(params$file == names[i]),match("sigma", colnames(params))]
+      weight_n <- params[which(params$file == names[i]),match("P0", colnames(params))]
+      weight_a <- params[which(params$file == names[i]),match("P1", colnames(params))]
+      train_test <- weight_classification(datasets[[i]], file_name = datasets_names[i], C = cost,
+                                            gamma = sigma, weight_normal = weight_n,
+                                            weight_anomaly = weight_a, cluster = F, test = T)
 
       weight_model <- train_test[[2]]
-      # print(train_test)
       cat(datasets_names[i],weight_model[1], weight_model[2], weight_model[3],
           weight_model[4], weight_model[5], "\n",
           file = paste("./results/",metric,"/testing/results_weights.txt", sep = ""),
           append = T, sep = ",")
     }
   }
+  if(autoencoder == T){
+    params <- read.csv(paste("./results/",metric,"/training/parameters/autoencoder.txt",sep = ""),
+                       sep = ",")
+    if(first == T)cat("file,TN,FN,FP,TP,Kappa,\n",
+                      file = paste("./results/",metric, "/testing/results_autoencoder.txt",sep = ""),
+                      append = F)
+    for(i in 1:length(datasets)){
+      L1 <- params[which(params$file == names[i]),match("L1", colnames(params))]
+      L2 <- params[which(params$file == names[i]),match("L2", colnames(params))]
+      L3 <- params[which(params$file == names[i]),match("L3", colnames(params))]
+      cat("L1 NEURONAS", L1)
+      train_test <- autoencoder_classification(datasets[[i]], file_name = datasets_names[i],
+                                               l1_neurons = L1, l2_neurons = L2,
+                                               l3_neurons = L3, metric = metric, test = T)
+      ae_model <- train_test[[1]]
+      # Write results of training
+      cat(datasets_names[i], ae_model[1], ae_model[2], ae_model[3], ae_model[4],ae_model[8],
+          "\n", file = paste("./results/",metric, "/testing/results_autoencoder.txt", sep = ""),
+          append = T, sep = ",")
+    }
+  }
+  
 }
 
 for(i in 1:10){
   for(j in 1:length(datasets)){
-    # cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
     create_train_test(datasets[[j]], folder = datasets_names[j])
   }
   cat("iteration", i)
   fold1 <- ifelse(i == 1, T, F)
   
-  # write_result_test(datasets, datasets_names, baseline = T, first = fold1)
-  # write_result_test(datasets, datasets_names, svdd = T, first = fold1)
-  # write_result_test(datasets, datasets_names, one_class = T, first = fold1)
-  # write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 50)
-  # write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 60)
-  # write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 65)
-  # cat("ASDASD")
-  write_result_test(datasets, datasets_names, weights = T, first = fold1)
+  write_result_test(datasets, datasets_names, baseline = T, first = fold1)
+  write_result_test(datasets, datasets_names, svdd = T, first = fold1, metric = "jaccard")
+  write_result_test(datasets, datasets_names, one_class = T, first = fold1, metric = "jaccard")
+  write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 50,
+                    metric = "jaccard")
+  write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 60,
+                    metric = "jaccard")
+  write_result_test(datasets, datasets_names, smote = T, first = fold1, prop_majority = 65,
+                    metric = "jaccard")
+  write_result_test(datasets, datasets_names, weights = T, first = fold1, metric = "jaccard")
+  write_result_test(datasets, datasets_names, autoencoder = T, first = fold1, metric = "recall")
 }

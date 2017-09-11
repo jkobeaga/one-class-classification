@@ -1,0 +1,12 @@
+"file","L1","L2","L3"
+"biodegrad",20,20,20
+"blood_trans",2,2,2
+"breast",10,10,10
+"ecoli",2,2,2
+"fertility",10,10,16
+"haberman",2,2,2
+"ionosphere",20,20,25
+"liver",10,10,10
+"mammo",10,10,10
+"parkinson",20,20,20
+"seeds",2,2,2

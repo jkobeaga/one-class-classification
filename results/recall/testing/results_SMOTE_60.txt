@@ -1,4 +1,4 @@
-file,cost,sigma,nSV_0,nSV_1,TN,FN,FP,TP,Kappa,
+file,TN,FN,FP,TP,Kappa,
 blood_trans,171,2,0,51,0.99,
 biodegrad,209,102,0,4,0.67,
 breast,14,17,0,0,0.45,

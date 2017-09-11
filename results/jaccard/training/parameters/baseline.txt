@@ -1,0 +1,12 @@
+"file","cost","n"
+"biodegrad",0.01,7
+"blood_trans",0.01,5
+"breast",0.01,10
+"ecoli",0.01,8
+"fertility",0.01,10
+"haberman",0.01,8
+"ionosphere",0.01,9
+"liver",0.01,10
+"mammo",0.01,7
+"parkinson",0.01,10
+"seeds",0.01,10

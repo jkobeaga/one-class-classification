@@ -18,7 +18,7 @@ cluster_weight <- function(df,prop=0.05, file_name){
   training <- cluster_assign(training, file_name)
   
   # Predict the corresponing cluster for each observation of test using KNN
-  # testing <- predict_cluster(training, testing) 
+  # testing <- predict_cluster(training, testing)
   predictions <- c()
   
   # TRAINING
@@ -53,7 +53,7 @@ cluster_weight <- function(df,prop=0.05, file_name){
                                       weight_normal = weight_normal, weight_anomaly = weight_anomaly,
                                       cluster = T)
       model<- train(formulae, data = train_clust,
-                    tuneLength=5,method = "glm", family="binomial",#trControl=train_control,
+                    tuneLength=5,method = "glm", family="binomial",
                     preProcess = c("center","scale"), na.action = na.omit)
       in_clus_pred <- as.character(predict(model,train_clust))
       predictions <- c(predictions, in_clus_pred)
@@ -64,17 +64,5 @@ cluster_weight <- function(df,prop=0.05, file_name){
   cm <- confusionMatrix(predictions, training[,ncol(training)-1], positive = "Yes")
   pred <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
             round(cm$table[2,2],2), round(cm$byClass[4],2))
-  # cat(pred,"\n")
   pred
-}
-# cat("file,nu,TN,FP,FN,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_cluster_svdd.txt", append = F)
-for(i in 1:length(datasets)){
-  cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
-  C=seq(0.5,3,0.5)
-  gamma_list=seq(0.1,1,0.3)
-  weight_normal <- c(0.5,1)
-  weight_anomaly <- seq(2,20,2)
-  cluster_weight(datasets[[i]], file_name = datasets_names[i], C = C, gamma = gamma_list,
-                 weight_normal = weight_normal, weight_anomaly = weight_anomaly)
-  
 }

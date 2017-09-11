@@ -61,7 +61,8 @@ cluster_smote <- function(df,prop=0.05, file_name, C, gamma_list, prop_majority,
     }
     else{
       cat("Before Smote Cluster:", dim(train_clust)[1],length(which(train_clust[,ncol(train_clust)]==1)),"\n")
-      # train_clust <- SMOTE(formulae, data = train_clust, perc.over = 3000, perc.under = 100)
+      
+      # 65-35 without removing the majority class observations.
       if(prop_majority == 65)train_clust <- SMOTE(formulae, data = train_clust, perc.over = 1500,
                                                per.under = 200)
       # 60-40 without removing the majority class observations.
@@ -104,15 +105,5 @@ cluster_smote <- function(df,prop=0.05, file_name, C, gamma_list, prop_majority,
   cm <- confusionMatrix(predictions_test, testing[,ncol(testing)-1], positive = "Yes")
   pred_test <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
             round(cm$table[2,2],2), round(cm$byClass[4],2))
-  # print(pred)
-  # cat("\n")
   list(pred, pred_test)
-}
-# cat("file,nu,TN,FP,FN,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_cluster_svdd.txt", append = F)
-for(i in 1:length(datasets)){
-  cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
-  gamma_list <- seq(0.1,0.6,0.05)
-  C <- c(seq(0.01,0.2,0.02))
-  cluster_smote(datasets[[i]], file_name = datasets_names[i], C = C, gamma_list = gamma_list, prop_majority = 50)
-  
 }

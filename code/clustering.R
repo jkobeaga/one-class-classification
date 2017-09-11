@@ -1,6 +1,5 @@
 # Function to calculate the best number of cluster for many different indexes
 cluster_best <- function(df, methods, name){
-  # clust_polling <- data.frame(clusters = integer(), votes = integer())
   clust_polling <- rep(0,10)
   for(met in methods){
     cat("\n",met)

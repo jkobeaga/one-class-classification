@@ -24,8 +24,6 @@ cluster_svdd <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list,
   predictions_test <- c()
   
   # TRAINING
-  # nu_list <- seq(0.01,0.2,0.02)
-  # gamma_list <- seq(0.1,0.6,0.05)
   for(clus in unique(training$cluster)){
     # Take observations for each cluster
     train_clust <- training[which(training$cluster == clus), -ncol(training)]
@@ -74,13 +72,4 @@ cluster_svdd <- function(df,prop=0.05, file_name, C, nu_list = prop, gamma_list,
   pred_test <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
     round(cm$table[2,2],2), round(cm$byClass[4],2))
   list(pred,pred_test)
-}
-# cat("file,nu,TN,FP,FN,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_cluster_svdd.txt", append = F)
-for(i in 1:length(datasets)){
-  cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
-  nu_list <- seq(0.01,0.2,0.02)
-  gamma_list <- seq(0.1,0.6,0.05)
-  C <- c(seq(0.01,0.2,0.02))
-  cluster_svdd(datasets[[i]], file_name = datasets_names[i], C, nu_list = prop, gamma_list)
-  
 }

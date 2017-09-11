@@ -81,19 +81,6 @@ cluster_weight <- function(df,prop=0.05, file_name, C, gamma, weight_normal, wei
   cm <- confusionMatrix(predictions_test, testing[,ncol(testing)-1], positive = "Yes")
   pred_test <- c(round(cm$table[1,1],2), round(cm$table[1,2],2), round(cm$table[2,1],2),
                  round(cm$table[2,2],2), round(cm$byClass[4],2))
-  # print(pred)
-  # cat("\n")
   list(pred, pred_test)
-  
-}
-# cat("file,nu,TN,FP,FN,TP,Recall,Neg_pred,Kappa,\n", file = "results/results_cluster_svdd.txt", append = F)
-for(i in 1:length(datasets)){
-  cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
-  C=seq(0.5,3,0.5)
-  gamma_list=seq(0.1,1,0.3)
-  weight_normal <- c(0.5,1)
-  weight_anomaly <- seq(2,20,2)
-  cluster_weight(datasets[[i]], file_name = datasets_names[i], C = C, gamma = gamma_list,
-                 weight_normal = weight_normal, weight_anomaly = weight_anomaly)
   
 }

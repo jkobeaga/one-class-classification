@@ -1,3 +1,4 @@
+# In this file you will find al the functions needed to load and prepare all the data.
 
 # Function to load all the necesary libraries 
 load_libraries <- function(){
@@ -105,7 +106,7 @@ load_parkinson <- function(){
   df <- df[,-1]
   m_status <- match("status", colnames(df))
   df <- df[, c(1:(m_status-1),(m_status+1):dim(df)[2],m_status)]
-  # Cambiamos 0<-->1 para que la clase normal sea 0.
+  # Changing 0<-->1 to be 0 the normal class.
   df$status <- as.factor(ifelse(df$status == 1, 0, 1))
   df <- to_dummies(df)
   df
@@ -125,19 +126,6 @@ load_seeds <- function(){
   df
 }
 
-load_skin <- function(){
-  df <- read.csv("./uci_datasets/skin_segmentation/Skin_NonSkin.txt", sep = "", header = F)
-  df$V4 <- as.factor(ifelse(df$V4 == 2, 0, 1))
-  df <- to_dummies(df)
-  df
-}
-
-# load_yeast <- function(){
-#   df <- read.csv("./uci_datasets/yeast/yeast.csv", sep = "", header = F)
-#   df <- df[,-1]
-#   df
-# }
-
 # Loading libraries
 load_libraries()
 
@@ -153,8 +141,6 @@ mammo <- load_mammo()
 parkinson <- load_parkinson()
 biodegrad  <- load_biodegrad()
 seeds <- load_seeds()
-skin <- load_skin()
-# yeast <- load_yeast()
 
 
 ## Function to create an unbalanced dataset, (1-prop)- prop.
@@ -162,7 +148,6 @@ data_split <- function(df, prop = 0.05){
   n_pos <- round(length(which(df[,dim(df)[2]]==0))*prop)
   pos_obs <- sample(which(df[,dim(df)[2]]==1),n_pos)
   df_t <- df[c(pos_obs,which(df[,dim(df)[2]]==0)),]
-  # df_pos <- df[-c(pos_obs,which(df[,dim(df)[2]]==0)),]
   df_t
 }
 
@@ -196,17 +181,8 @@ create_train_test <- function(df, folder, prop =  0.05){
 
 # List of all datasets we need
 datasets <- list(blood_trans, biodegrad, breast, ecoli, fertility, haberman, liver, ionosphere, mammo,
-                 parkinson, seeds)# skin
-# datasets <- list(haberman)# skin
+                 parkinson, seeds)
 
 # List of datasets names
 datasets_names <- c("blood_trans", "biodegrad", "breast", "ecoli", "fertility", "haberman", "liver",
-                    "ionosphere", "mammo", "parkinson", "seeds")# skin
-# datasets_names <- c("haberman")# skin
-
-for(i in 1:length(datasets)){
-  cat("iiiiiiiiiiiiiiiiiiii", i, "\n")
-  create_train_test(datasets[[i]], folder = datasets_names[i])
-  
-}
-
+                    "ionosphere", "mammo", "parkinson", "seeds")

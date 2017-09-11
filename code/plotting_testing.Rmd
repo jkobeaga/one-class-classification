@@ -1,0 +1,339 @@
+---
+title: "Plotting Results"
+author: "Jon Kobeaga"
+date: "May 31, 2017"
+output: pdf_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+# Plotting Results
+
+En este documento analizaremos los resultados obtenidos anteriormente utilizando diferentes técnicas de anomaly detection.
+
+## testing
+```{r}
+svdd_r <- read.csv("./results/recall/testing/results_svdd.txt", sep = ",")
+oneclass_r <- read.csv("./results/recall/testing/results_Scholkopf.txt", sep = ",")
+smote_50_r <- read.csv("./results/recall/testing/results_SMOTE_50.txt", sep = ",")
+smote_60_r <- read.csv("./results/recall/testing/results_SMOTE_60.txt", sep = ",")
+smote_65_r <- read.csv("./results/recall/testing/results_SMOTE_65.txt", sep = ",")
+weights_r <- read.csv("./results/recall/testing/results_weights.txt", sep = ",")
+lr_r <- read.csv("./results/recall/testing/results_LR.txt", sep = ",")
+autoencoder_r <- read.csv("./results/recall/testing/results_autoencoder.txt", sep = ",")
+svdd_cr <- read.csv("./results/recall/testing/results_cluster_svdd.txt", sep = ",")
+oneclass_cr <- read.csv("./results/recall/testing/results_cluster_Scholkopf.txt", sep = ",")
+smote_50_cr <- read.csv("./results/recall/testing/results_cluster_SMOTE_50.txt", sep = ",")
+smote_60_cr <- read.csv("./results/recall/testing/results_cluster_SMOTE_60.txt", sep = ",")
+smote_65_cr <- read.csv("./results/recall/testing/results_cluster_SMOTE_65.txt", sep = ",")
+weights_cr <- read.csv("./results/recall/testing/results_cluster_weights.txt", sep = ",")
+frac <- read.csv("./results/recall/testing/results_frac.txt", sep = ",")
+```
+
+Ahora calcularemos las metricas que nos interesan basándonos en los resultados obtenidos.
+```{r}
+svdd_r <- add_metric(svdd_r)
+oneclass_r <- add_metric(oneclass_r)
+smote_50_r <- add_metric(smote_50_r)
+smote_60_r <- add_metric(smote_60_r)
+smote_65_r <- add_metric(smote_65_r)
+weights_r <- add_metric(weights_r)
+lr_r <- add_metric(lr_r)
+autoencoder_r <- add_metric(autoencoder_r)
+svdd_cr <- add_metric(svdd_cr)
+oneclass_cr <- add_metric(oneclass_cr)
+smote_50_cr <- add_metric(smote_50_cr)
+smote_60_cr <- add_metric(smote_60_cr)
+smote_65_cr <- add_metric(smote_65_cr)
+weights_cr <- add_metric(weights_cr)
+frac <- add_metric(frac)
+```
+
+### Recall
+#### Estadísticos
+Cálcularemos la media y la varianza del Recall.
+```{r}
+svdd_r <- svdd_r  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+oneclass_r <- oneclass_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_50_r <- smote_50_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_60_r <- smote_60_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_65_r <- smote_65_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+weights_r <- weights_r  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+lr_r <- lr_r %>% filter(Corrected == "TRUE") %>%  group_by(file, Corrected) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+autoencoder_r <- autoencoder_r %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+svdd_cr <- svdd_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+oneclass_cr <- oneclass_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_50_cr <- smote_50_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_60_cr <- smote_60_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_65_cr <- smote_65_cr %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+weights_cr <- weights_cr  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza) 
+frac_r <- frac  %>% select(file, recall) %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+
+# We are going to calculate the mean of the mean and of the standard error and add all of them
+# to a dataframe
+df_results <- data.frame(Method = factor(), media = numeric(), varianza = numeric())
+df_results <- rbind(df_results, data.frame(t(c("SVDD",colMeans(svdd_r[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("PSVM",colMeans(oneclass_r[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_50",colMeans(smote_50_r[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_60",colMeans(smote_60_r[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_65",colMeans(smote_65_r[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("WEIGHTS",colMeans(weights_r[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("LR",colMeans(lr_r[,3:4])))))
+df_results <- rbind(df_results, data.frame(t(c("AUTOENCODER",colMeans(autoencoder_r[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SVDD",colMeans(svdd_cr[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_PSVM",colMeans(oneclass_cr[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_50",colMeans(smote_50_cr[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_60",colMeans(smote_60_cr[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_65",colMeans(smote_65_cr[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_WEIGHTS",colMeans(weights_cr[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("FRaC",colMeans(frac_r[,2:3])))))
+colnames(df_results) <- c("Method", "Mean", "Std")
+df_results$Mean <- as.numeric(as.character(df_results$Mean))
+df_results$Std <- as.numeric(as.character(df_results$Std))
+```
+Now we are going to plot all the result in a graphic, where the x axis is the recall mean and the y axis is the standard deviation:
+```{r}
+df_results %>% 
+  ggplot(aes(Mean, Std, color = Method, label = Method)) +  geom_point(size = 3) + geom_text(aes(label=Method),hjust=0.5, vjust=-1) + ggtitle("Resultados con Recall")
+ggplot(df_results,aes(x = media, y = varianza))
+```
+
+#### Boxplots
+Ahora para cada modelo, haremos gráficas de cajas para ver como actúa cada modelo.
+```{r}
+baseline_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in baseline model")
+svdd_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SVDD model")
+oneclass_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in One-Class model")
+smote_50_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SMOTE 50-50 model")
+smote_60_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SMOTE 60-40 model")
+smote_65_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in SMOTE 65 -35 model")
+weights_r %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Weigths model")
+lr_r %>% filter(Corrected == T) %>%  ggplot(aes(file, recall, fill = file)) + geom_boxplot()  + ggtitle("Recall in Adjusted LR model")
+autoencoder_r %>%  ggplot(aes(file, recall, fill = file)) + geom_boxplot()  + ggtitle("Recall in Autoencoder model")
+svdd_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SVDD model")
+oneclass_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster One-Class model")
+smote_50_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SMOTE 50-50 model")
+smote_60_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SMOTE 60-40 model")
+smote_65_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SMOTE 65-35 model")
+weights_cr %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall in Cluster SVDD model")
+```
+
+
+### F1
+```{r}
+svdd_f1 <- read.csv("./results/F1/testing/results_svdd.txt", sep = ",")
+oneclass_f1 <- read.csv("./results/F1/testing/results_Scholkopf.txt", sep = ",")
+smote_50_f1 <- read.csv("./results/F1/testing/results_SMOTE_50.txt", sep = ",")
+smote_60_f1 <- read.csv("./results/F1/testing/results_SMOTE_60.txt", sep = ",")
+smote_65_f1 <- read.csv("./results/F1/testing/results_SMOTE_65.txt", sep = ",")
+weights_f1 <- read.csv("./results/F1/testing/results_weights.txt", sep = ",")
+lr_f1 <- read.csv("./results/F1/testing/results_LR.txt", sep = ",")
+autoencoder_f1 <- read.csv("./results/F1/testing/results_autoencoder.txt", sep = ",")
+svdd_cf1 <- read.csv("./results/F1/testing/results_cluster_svdd.txt", sep = ",")
+oneclass_cf1 <- read.csv("./results/F1/testing/results_cluster_Scholkopf.txt", sep = ",")
+smote_50_cf1 <- read.csv("./results/F1/testing/results_cluster_SMOTE_50.txt", sep = ",")
+smote_60_cf1 <- read.csv("./results/F1/testing/results_cluster_SMOTE_60.txt", sep = ",")
+smote_65_cf1 <- read.csv("./results/F1/testing/results_cluster_SMOTE_65.txt", sep = ",")
+weights_cf1 <- read.csv("./results/F1/testing/results_cluster_weights.txt", sep = ",")
+frac <- read.csv("./results/recall/testing/results_frac.txt", sep = ",")
+```
+
+Ahora calcularemos las metricas que nos interesan basándonos en los resultados obtenidos.
+```{r}
+svdd_f1 <- add_metric(svdd_f1)
+oneclass_f1 <- add_metric(oneclass_f1)
+smote_50_f1 <- add_metric(smote_50_f1)
+smote_60_f1 <- add_metric(smote_60_f1)
+smote_65_f1 <- add_metric(smote_65_f1)
+weights_f1 <- add_metric(weights_f1)
+lr_f1 <- add_metric(lr_f1)
+autoencoder_f1 <- add_metric(autoencoder_f1)
+svdd_cf1 <- add_metric(svdd_cf1)
+oneclass_cf1 <- add_metric(oneclass_cf1)
+smote_50_cf1 <- add_metric(smote_50_cf1)
+smote_60_cf1 <- add_metric(smote_60_cf1)
+smote_65_cf1 <- add_metric(smote_65_cf1)
+weights_cf1 <- add_metric(weights_cf1)
+frac <- add_metric(frac)
+```
+
+#### Estadísticos
+Cálcularemos la media y la varianza del Recall.
+```{r}
+svdd_f1 <- svdd_f1  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+oneclass_f1 <- oneclass_f1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_50_f1 <- smote_50_f1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_60_f1 <- smote_60_f1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_65_f1 <- smote_65_f1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+weights_f1 <- weights_f1  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+lr_f1 <- lr_f1 %>% filter(Corrected == "TRUE") %>%  group_by(file, Corrected) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+autoencoder_f1 <- autoencoder_f1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+svdd_cf1 <- svdd_cf1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+oneclass_cf1 <- oneclass_cf1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_50_cf1 <- smote_50_cf1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_60_cf1 <- smote_60_cf1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_65_cf1 <- smote_65_cf1 %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+weights_cf1 <- weights_cf1  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza) 
+frac_f1 <- frac  %>% select(file, F1) %>% group_by(file) %>% mutate(media = mean(F1), varianza = sd(F1)) %>% select(file,media, varianza)
+
+# We are going to calculate the mean of the mean and of the standard error and add all of them
+# to a dataframe
+df_results <- data.frame(Method = factor(), media = numeric(), varianza = numeric())
+df_results <- rbind(df_results, data.frame(t(c("SVDD",colMeans(svdd_f1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("PSVM",colMeans(oneclass_f1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_50",colMeans(smote_50_f1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_60",colMeans(smote_60_f1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_65",colMeans(smote_65_f1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("WEIGHTS",colMeans(weights_f1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("LR",colMeans(lr_f1[,3:4])))))
+df_results <- rbind(df_results, data.frame(t(c("AUTOENCODER",colMeans(lr_f1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("AUTOENCODER",colMeans(autoencoder_f1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SVDD",colMeans(svdd_cf1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_PSVM",colMeans(oneclass_cf1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_50",colMeans(smote_50_cf1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_60",colMeans(smote_60_cf1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_65",colMeans(smote_65_cf1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_WEIGHTS",colMeans(weights_cf1[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("FRaC",colMeans(frac_f1[,2:3])))))
+colnames(df_results) <- c("Method", "Mean", "Std")
+df_results$Mean <- as.numeric(as.character(df_results$Mean))
+df_results$Std <- as.numeric(as.character(df_results$Std))
+```
+Now we are going to plot all the result in a graphic, where the x axis is the recall mean and the y axis is the standard deviation:
+```{r}
+df_results %>% 
+  ggplot(aes(Mean, Std, color = Method, label = Method)) +  geom_point(size = 3) + geom_text(aes(label=Method),hjust=0.5, vjust=-1) + ggtitle("Resultados con F1")
+ggplot(df_results,aes(x = media, y = varianza))
+```
+
+#### Boxplots
+Ahora para cada modelo, haremos gráficas de cajas para ver como actúa cada modelo.
+```{r}
+svdd_f1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in SVDD model")
+oneclass_f1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in One-Class model")
+smote_50_f1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in SMOTE 50-50 model")
+smote_60_f1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in SMOTE 60-40 model")
+smote_65_f1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in SMOTE 65 -35 model")
+weights_f1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in Weigths model")
+lr_f1 %>% filter(Corrected == T) %>%  ggplot(aes(file, recall, fill = file)) + geom_boxplot()  + ggtitle("F1 in Adjusted LR model")
+autoencoder_f1 %>%  ggplot(aes(file, recall, fill = file)) + geom_boxplot()  + ggtitle("F1 in Adjusted LR model")
+svdd_cf1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster SVDD model")
+oneclass_cf1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster One-Class model")
+smote_50_cf1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster SMOTE 50-50 model")
+smote_60_cf1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster SMOTE 60-40 model")
+smote_65_cf1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster SMOTE 65-35 model")
+weights_cf1 %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("F1 in Cluster SVDD model")
+```
+
+Vamos a escoger los mejores parámetros en cada datasets para hacer el testing. Esto lo haremos en los siguientes datasets:
+baseline, svdd, oneclass,smote, weights
+
+
+
+
+
+## Jaccard
+
+```{r}
+svdd_j <- read.csv("./results/jaccard/testing/results_svdd.txt", sep = ",")
+oneclass_j <- read.csv("./results/jaccard/testing/results_Scholkopf.txt", sep = ",")
+smote_50_j <- read.csv("./results/jaccard/testing/results_SMOTE_50.txt", sep = ",")
+smote_60_j <- read.csv("./results/jaccard/testing/results_SMOTE_60.txt", sep = ",")
+smote_65_j <- read.csv("./results/jaccard/testing/results_SMOTE_65.txt", sep = ",")
+weights_j <- read.csv("./results/jaccard/testing/results_weights.txt", sep = ",")
+lr_j <- read.csv("./results/jaccard/testing/results_LR.txt", sep = ",")
+autoencoder_j <- read.csv("./results/jaccard/testing/results_autoencoder.txt", sep = ",")
+svdd_cj <- read.csv("./results/jaccard/testing/results_cluster_svdd.txt", sep = ",")
+oneclass_cj <- read.csv("./results/jaccard/testing/results_cluster_Scholkopf.txt", sep = ",")
+smote_50_cj <- read.csv("./results/jaccard/testing/results_cluster_SMOTE_50.txt", sep = ",")
+smote_60_cj <- read.csv("./results/jaccard/testing/results_cluster_SMOTE_60.txt", sep = ",")
+smote_65_cj <- read.csv("./results/jaccard/testing/results_cluster_SMOTE_65.txt", sep = ",")
+weights_cj <- read.csv("./results/jaccard/testing/results_cluster_weights.txt", sep = ",")
+frac <- read.csv("./results/recall/testing/results_frac.txt", sep = ",")
+```
+
+Ahora calcularemos las metricas que nos interesan basándonos en los resultados obtenidos.
+```{r}
+svdd_j <- add_metric(svdd_j)
+oneclass_j <- add_metric(oneclass_j)
+smote_50_j <- add_metric(smote_50_j)
+smote_60_j <- add_metric(smote_60_j)
+smote_65_j <- add_metric(smote_65_j)
+weights_j <- add_metric(weights_j)
+lr_j <- add_metric(lr_j)
+autoencoder_j <- add_metric(autoencoder_j)
+svdd_cj <- add_metric(svdd_cj)
+oneclass_cj <- add_metric(oneclass_cj)
+smote_50_cj <- add_metric(smote_50_cj)
+smote_60_cj <- add_metric(smote_60_cj)
+smote_65_cj <- add_metric(smote_65_cj)
+weights_cj <- add_metric(weights_cj)
+frac <- add_metric(frac)
+```
+
+#### Estadísticos
+Cálcularemos la media y la varianza del Recall.
+```{r}
+svdd_j <- svdd_j  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+oneclass_j <- oneclass_j %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_50_j <- smote_50_j %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_60_j <- smote_60_j %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_65_j <- smote_65_j %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+weights_j <- weights_j  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+lr_j <- lr_j %>% filter(Corrected == "TRUE") %>%  group_by(file, Corrected) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+autoencoder_j <- autoencoder_j %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+svdd_cj <- svdd_cj %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+oneclass_cj <- oneclass_cj %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_50_cj <- smote_50_cj %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_60_cj <- smote_60_cj %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+smote_65_cj <- smote_65_cj %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza)
+weights_cj <- weights_cj  %>% group_by(file) %>% mutate(media = mean(recall), varianza = sd(recall)) %>% select(file,media, varianza) 
+weights_cj %>% select(media, varianza) %>% summarise(mean)
+frac_j <- frac  %>% select(file, jaccard) %>% group_by(file) %>% mutate(media = mean(jaccard), varianza = sd(jaccard)) %>% select(file,media, varianza)
+
+
+# We are going to calculate the mean of the mean and of the standard error and add all of them
+# to a dataframe
+df_results <- data.frame(Method = factor(), media = numeric(), varianza = numeric())
+df_results <- rbind(df_results, data.frame(t(c("SVDD",colMeans(svdd_j[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("PSVM",colMeans(oneclass_j[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_50",colMeans(smote_50_j[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_60",colMeans(smote_60_j[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("SMOTE_65",colMeans(smote_65_j[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("WEIGHTS",colMeans(weights_j[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("LR",colMeans(lr_j[,3:4])))))
+df_results <- rbind(df_results, data.frame(t(c("AUTOENCODER",colMeans(autoencoder_j[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SVDD",colMeans(svdd_cj[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_PSVM",colMeans(oneclass_cj[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_50",colMeans(smote_50_cj[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_60",colMeans(smote_60_cj[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_SMOTE_65",colMeans(smote_65_cj[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("CLUSTER_WEIGHTS",colMeans(weights_cj[,2:3])))))
+df_results <- rbind(df_results, data.frame(t(c("FRaC",colMeans(frac_j[,2:3])))))
+colnames(df_results) <- c("Method", "Mean", "Std")
+df_results$Mean <- as.numeric(as.character(df_results$Mean))
+df_results$Std <- as.numeric(as.character(df_results$Std))
+```
+Now we are going to plot all the result in a graphic, where the x axis is the recall mean and the y axis is the standard deviation:
+```{r}
+df_results %>% 
+  ggplot(aes(Mean, Std, color = Method, label = Method)) +  geom_point(size = 3) + geom_text(aes(label=Method),hjust=0.5, vjust=-1) + ggtitle("Resultados con Jaccard")
+ggplot(df_results,aes(x = media, y = varianza))
+```
+
+
+## FRaC
+
+Were are going to plot the results of FRaC in another graphic because we haven't optimize according to an specific metric.
+
+```{r}
+frac <- read.csv("./results/recall/training/results_frac.txt", sep = ",")
+frac <- add_metric(frac)
+frac %>% ggplot(aes(file, recall, fill = file)) + geom_boxplot() + ggtitle("Recall with FRaC")
+frac %>% ggplot(aes(file, F1, fill = file)) + geom_boxplot() + ggtitle("F1 with FRaC")
+frac %>% ggplot(aes(file, jaccard, fill = file)) + geom_boxplot() + ggtitle("F1 with FRaC")
+```
+
